@@ -17,3 +17,4 @@ since there's no standard way of installing packages, that was the solution i ca
 
 .ii files are made during the package registration process, the user has to type everything necessary for that package to install, like `./configure; make; make install`
 
+the script is written entirely in bash. i originally wanted to make it in c, but nah
