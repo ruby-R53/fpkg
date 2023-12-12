@@ -1,0 +1,96 @@
+#!/bin/bash
+
+error () {
+	popd > /dev/null
+	stty echo
+	exit 1
+}
+
+# hide the keystrokes, save current directory to go to
+# the fpkg one
+stty -echo
+pushd . > /dev/null
+cd /usr/local/fpkg/
+
+# requested an update of all packages?
+if [ $1 = "update" ]; then
+	if [ $? != 0 ]; then
+		echo "fpkg directory does not exist!"
+		error
+	fi
+
+	entries=$(cat pkg.list | wc -l)
+
+	for ((i = 1; i <= $entries; i++)); do
+		pkg_dir=$(head -n $i pkg.list | tail -1)
+		cd $pkg_dir
+		echo "$pkg_dir:"
+		echo $(git pull)
+		cd - > /dev/null
+	done
+
+# requested the installation of a package?
+elif [ $1 = "install" ]; then
+	cd ii/
+
+	if [ $? != 0 ]; then
+		echo "No instruction files..."
+		error
+	fi
+
+	./$2.ii
+
+# adding an entry to the list?
+elif [ $1 = "add" ]; then
+	if [ $(whoami) != "root" ]; then
+		echo "oop, root privileges required!"
+		error
+	fi
+
+	stty echo
+	echo "Package name:"
+	read pkg_name
+	echo $pkg_name >> pkg.list
+	echo "# Writing installation instructions for package, you can ignore this line" > ii/$pkg_name.ii
+	echo "cd ../<package_dir_here>/" >> ii/$pkg_name.ii
+	$EDITOR ii/$pkg_name.ii
+	chmod +x ii/$pkg_name.ii
+
+# delete an entry from the list?
+elif [ $1 = "delete" ]; then
+	if [ $(whoami) != "root" ]; then
+		echo "oop, root privileges required!"
+		error
+	fi
+
+	stty echo
+	echo "Removing:"
+	read pkg_name
+	entry=$(grep -w "^$pkg_name" pkg.list -n | awk -F: '{print $1}')
+	sed -i "$entry"d pkg.list
+	rm ii/$pkg_name.ii
+	echo "$pkg_name removed, would you like to remove its files as well? [Y/n]"
+	read file_removal
+	if [ $file_removal = 'y' ]; then
+		echo "Package directory (relative to /usr/local/fpkg):"
+		read dir
+		rm -r $dir
+	else
+		popd > /dev/null
+		stty echo
+	fi
+
+# didn't even input a valid option?
+else
+	echo "Options:"
+	echo "update  - git pull every package on pkg.list"
+	echo "install - install a package following an instruction file"
+	echo "add     - add a package to the list"
+	echo "delete  - remove a package from the list"
+	error
+fi
+
+# restore the directory, and unhide
+# keystrokes
+popd > /dev/null
+stty echo
