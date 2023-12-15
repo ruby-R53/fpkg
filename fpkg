@@ -13,8 +13,8 @@ pushd . > /dev/null
 cd /usr/local/fpkg/
 
 # requested an update of all packages?
-if [ $1 = "update" ]; then
-	if [ $? != 0 ]; then
+if [[ $1 = "update" ]]; then
+	if [[ $? != 0 ]]; then
 		echo "fpkg directory does not exist!"
 		error
 	fi
@@ -30,10 +30,10 @@ if [ $1 = "update" ]; then
 	done
 
 # requested the installation of a package?
-elif [ $1 = "install" ]; then
+elif [[ $1 = "install" ]]; then
 	cd ii/
 
-	if [ $? != 0 ]; then
+	if [[ $? != 0 ]]; then
 		echo "No instruction files..."
 		error
 	fi
@@ -41,8 +41,8 @@ elif [ $1 = "install" ]; then
 	./$2.ii
 
 # adding an entry to the list?
-elif [ $1 = "add" ]; then
-	if [ $(whoami) != "root" ]; then
+elif [[ $1 = "add" ]]; then
+	if [[ $(whoami) != "root" ]]; then
 		echo "oop, root privileges required!"
 		error
 	fi
@@ -57,8 +57,8 @@ elif [ $1 = "add" ]; then
 	chmod +x ii/$pkg_name.ii
 
 # delete an entry from the list?
-elif [ $1 = "delete" ]; then
-	if [ $(whoami) != "root" ]; then
+elif [[ $1 = "delete" ]]; then
+	if [[ $(whoami) != "root" ]]; then
 		echo "oop, root privileges required!"
 		error
 	fi
@@ -71,7 +71,7 @@ elif [ $1 = "delete" ]; then
 	rm ii/$pkg_name.ii
 	echo "$pkg_name removed, would you like to remove its files as well? [Y/n]"
 	read file_removal
-	if [ $file_removal = 'y' ]; then
+	if [[ $file_removal = 'y' ]]; then
 		echo "Package directory (relative to /usr/local/fpkg):"
 		read dir
 		rm -r $dir
