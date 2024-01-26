@@ -5,11 +5,13 @@
 
 this is how i call packages that are not available in the repositories the user currently has, meaning they take them from other sources
 
+in this script, currently only sources from a git repository are supported
+
 ## how's that work?
 
 you have 2 files: `pkg.list` and `pkg.ii` files. both of them are on the default fpkg directory, `/usr/local/fpkg/`
 
-pkg.list contains the list of packages the user registered.
+pkg.list contains the list of packages the user has registered.
 
 "ii" stands for "`i`nstallation `i`nstructions", and files containing that extension are used by fpkg for installing packages. since there's no standard way of installing packages, that was the solution i came up with lol
 
