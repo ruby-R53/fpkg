@@ -80,13 +80,25 @@ elif [[ $1 = "delete" ]]; then
 		stty echo
 	fi
 
+# requested the message of last git commit?
+elif [[ $1 = "message" ]]; then
+	cd $2
+
+	if [[ $? != 0 ]]; then
+		echo "Package does not exist! Was it a typo?"
+		error
+	fi
+
+	echo $(git log -1 --pretty=%B)
+
 # didn't even input a valid option?
 else
 	echo "Options:"
-	echo "update  - git pull every package on pkg.list"
-	echo "install - install a package following an instruction file"
-	echo "add     - add a package to the list"
-	echo "delete  - remove a package from the list"
+	echo "update        - git pull every package on pkg.list"
+	echo "install <pkg> - install <pkg> with instruction file"
+	echo "add           - add a package to the list"
+	echo "delete        - remove a package from the list"
+	echo "message <pkg> - get comment from last git commit of <pkg>"
 	error
 fi
 
