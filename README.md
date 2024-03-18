@@ -1,20 +1,28 @@
 # fpkg
-`fpkg` stands for "`f`oreign `p`ac`k`a`g`e".
+This name stands for *f*oreign *p*ac*k*a*g*e!
 
-## what are foreign packages, though?
+### And what is a "foreign package"?
 
-this is how i call packages that are not available in the repositories the user currently has, meaning they take them from other sources
+That is how I call packages not available on the repositories of an user. It can be from any source but those, although this script currently supports GitHub only.
 
-in this script, currently only sources from a git repository are supported
+### How does it work?
 
-## how's that work?
+`fpkg` needs 2 files in order to run: the text file `pkg.list` and the directory `ii/`.
 
-you have 2 files: `pkg.list` and `pkg.ii` files. both of them are on the default fpkg directory, `/usr/local/fpkg/`
+`pkg.list` contains a newline-separated list of all packages, and you currently have to register them manually. You can easily do this by running `fpkg add`.
 
-`pkg.list` contains the list of packages the user has registered
+This list is currently being used solely for `fpkg` to know which packages it has to update. The update happens by simply issuing `git pull` inside the selected directory :)
 
-"ii" stands for "`i`nstallation `i`nstructions", and files containing that extension are used by fpkg for installing packages. since there's no standard way of installing packages, that was the solution i came up with lol
+`ii/` contains little scripts written manually for installation of packages.
 
-.ii files are made during the package registration process, the user has to type everything necessary for that package to install, like `./configure; make; make install`
+Since not every package uses the same steps for building, that was the solution I came up with. `fpkg add` already redirects you to write those steps using your favorite text editor, though!
 
-the script is written entirely in bash. i originally wanted to make it in c, but nah
+### Setup
+
+Just put the script somewhere in your `$PATH`. I use `/usr/local/bin/` for it.
+
+As for the directory containing all packages, that is literally the first line of code (after the classic `#!/bin/bash` of course). You just change `$FPKGDIR` to whatever you want.
+
+And for the text editor, it's also as simple. Change `$EDITOR` to your favorite text editor.
+
+That's it, you're good to go! Don't forget to run `fpkg help` to get some extra stuff as well :)
