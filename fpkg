@@ -1,5 +1,8 @@
 #!/bin/bash
 
+FPKGDIR="/usr/local/fpkg/" # where all packages are located at
+EDIOR="vim"                # change this to your favorite editor
+
 error () {
 	popd > /dev/null
 	stty echo
@@ -14,9 +17,6 @@ write_check () {
 		error
 	fi
 }
-
-FPKGDIR="/usr/local/fpkg/" # where all packages are located at
-EDIOR="vim"                # change this to your favorite editor
 
 # hide the keystrokes, save current directory to go to
 # the fpkg one
