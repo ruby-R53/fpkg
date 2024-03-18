@@ -31,4 +31,4 @@ That's it, you're good to go! Don't forget to run `fpkg help` to get some extra 
 
 Any suggestions or issues? Open a new issue or make a pull request, that would be very appreciated!
 
-And I would say that just by using this script you're already contibuting to this project honestly :)
+And I would say that just by using the script you're already contributing to this project honestly :)
