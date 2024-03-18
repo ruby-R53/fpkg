@@ -11,8 +11,13 @@ error () {
 
 write_check () {
 	touch $FPKGDIR > /dev/null 2>&1
+	ret=$((ret + $?))
+	touch $FPKGDIR/pkg.list > /dev/null 2>&1
+	ret=$((ret + $?))
+	touch $FPKGDIR/ii > /dev/null 2>&1
+	ret=$((ret + $?))
 
-	if [[ $? != 0 ]]; then
+	if [[ $ret > 0 ]]; then
 		echo "ERROR: you cannot write to $FPKGDIR! Please run as root"
 		error
 	fi
