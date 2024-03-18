@@ -26,3 +26,9 @@ As for the directory containing all packages, that is literally the first line o
 And for the text editor, it's also as simple. Change `$EDITOR` to your favorite text editor.
 
 That's it, you're good to go! Don't forget to run `fpkg help` to get some extra stuff as well :)
+
+### Contributing
+
+Any suggestions or issues? Open a new issue or make a pull request, that would be very appreciated!
+
+And I would say that just by using this script you're already contibuting to this project honestly :)
