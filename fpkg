@@ -3,6 +3,8 @@
 FPKGDIR="/usr/local/fpkg/" # where all packages are located at
 EDIOR="vim"                # change this to your favorite editor
 
+VERSION="1.0.0"            # not sure why i want a variable for that honestly
+
 error () {
 	popd > /dev/null
 	stty echo
@@ -10,6 +12,7 @@ error () {
 }
 
 write_check () {
+	# get return code to see if we can write to any of the files
 	touch $FPKGDIR > /dev/null 2>&1
 	ret=$((ret + $?))
 	touch $FPKGDIR/pkg.list > /dev/null 2>&1
@@ -17,14 +20,13 @@ write_check () {
 	touch $FPKGDIR/ii > /dev/null 2>&1
 	ret=$((ret + $?))
 
-	if [[ $ret > 0 ]]; then
+	if [[ $ret > 0 ]]; then # if any of the touch's fail
 		echo "ERROR: you cannot write to $FPKGDIR! Please run as root"
 		error
 	fi
 }
 
-# hide the keystrokes, save current directory to go to
-# the fpkg one
+# hide keystrokes, save current directory to go to $FPKGDIR
 stty -echo
 pushd . > /dev/null
 cd $FPKGDIR
@@ -33,7 +35,7 @@ if [[ $? != 0 ]]; then
 	echo "ERROR: $FPKGDIR does not exist! Create it now? [Y/n]"
 	read choice
 
-	if [[ choice != "n" ]]; then
+	if [[ choice != "n" ]]; then # so that the default is "yes"
 		mkdir -v $FPKGDIR
 	fi
 
@@ -43,7 +45,7 @@ fi
 case $1 in
 	# refresh every package using git pull
 	"update" | "u")
-		entries=$(cat pkg.list | wc -l)
+		entries=$(cat pkg.list | wc -l) # how many packages do we have?
 
 		for ((i = 1; i <= $entries; i++)); do
 			pkg_dir=$(head -n $i pkg.list | tail -1)
@@ -87,7 +89,7 @@ case $1 in
 	"list" | "l")
 		cat pkg.list
 		echo ""
-		echo "Total: $(cat pkg.list | wc -l)"
+		echo "Total: $(cat pkg.list | wc -l)" # get the number of installed packages as well
 		;;
 
 	# adding an entry to the list?
@@ -111,19 +113,16 @@ case $1 in
 		stty echo
 		echo "Removing:"
 		read pkg_name
-		entry=$(grep -w "^$pkg_name" pkg.list -n | awk -F: '{ print $1 }')
+		entry=$(grep -w "^$pkg_name" pkg.list -n | awk -F: '{ print $1 }') # FIXME: is there a better way of doing this?
 		sed -i "$entry"d pkg.list
 		rm ii/$pkg_name.ii
 		echo "$pkg_name removed, would you like to remove its files as well? [y/N]"
 		read file_removal
 
-		if [[ $file_removal = 'y' ]]; then
+		if [[ $file_removal = 'y' ]]; then # same thing but with "no"
 			echo "Package directory (relative to /usr/local/fpkg/):"
 			read dir
 			rm -rf $dir
-		else
-			popd > /dev/null
-			stty echo
 		fi
 		;;
 
@@ -152,18 +151,26 @@ case $1 in
 		fi
 		;;
 
-	# didn't even input a valid option?
+	# requested the version?
+	"version" | "v")
+		echo "fpkg version $VERSION"
+		echo "2024 ruby R53 (https://github.com/ruby-R53)"
+		;;
+
+	# didn't even input a valid action or wants to know
+	# them?
 	"help" | *)
 		echo "Usage: fpkg [action] [package]"
 		echo "Actions:"
-		echo "help | h           - shows this help message"
-		echo "update | u         - git pull every package listed in pkg.list"
-		echo "install | i <pkg>  - install <pkg> using instruction file"
-		echo "list | l           - list all registered packages"
-		echo "add | a            - add a package to the list"
-		echo "delete | d         - remove a package from the list"
-		echo "message [-d] <pkg> - get comment from last git commit of <pkg>. Takes an"
-		echo "                     optional -d for getting the diff"
+		echo "help | h               - shows this help message"
+		echo "update | u             - git pull every package listed in pkg.list"
+		echo "install | i <pkg>      - install <pkg> using instruction file"
+		echo "list | l               - list registered packages"
+		echo "add | a                - register a package"
+		echo "delete | d             - remove a package"
+		echo "message | m [-d] <pkg> - get comment from last git commit of <pkg>. Takes an"
+		echo "                         optional -d for getting the diff"
+		echo "version | v            - get fpkg's version"
 
 		if [[ $1 != "help" ]]; then
 			error
