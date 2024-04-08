@@ -1,8 +1,32 @@
+March 25 - April 8, 2024:
+- Version 2.0.0 is out already!
+- Improved error handling some more
+- Changed 'add' and 'delete' actions to take the package
+  name as an argument
+- Added 'edit':
+  - You can now edit a package's .ii using your editor
+    (defined in $EDITOR)
+  - Should I make it able to edit the package name and
+    directory as well?
+- Added some functions in the code so that it doesn't get
+  redundant
+- Fixed a silly typo
+  - Figure out what it was and get a cake :)
+- Added 'peek': you can now just look at a package's .ii
+- Added 'goto': you can now change to a package's
+  directory for a moment instead of typing its whole path
+- fpkg can now update git repos with submodules properly!
+  - Not sure if my implementation of it is crap though...
+- Changed how 'install' works
+  - The first line of the .ii's now start with
+    'cd <pkg>/' instead of 'cd ../<pkg>/', change your
+	.ii's accordingly!
+
 March 19, 2024:
 - Added a versioning scheme, first release
   - major.minor.revision -> 1.0.0
-  - major: +1 when a new feature is added
-  - minor: +1 when fixing something
+  - major: +1 when the entire program is changed
+  - minor: +1 when fixing something or adding a feature
   - revision: +1 for anything else that doesn't affect
     the program that much
 - Commented the code a bit better

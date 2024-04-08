@@ -3,12 +3,28 @@
 FPKGDIR="/usr/local/fpkg/" # where all packages are located at
 EDIOR="vim"                # change this to your favorite editor
 
-VERSION="1.0.0"            # not sure why i want a variable for that honestly
+VERSION="2.0.0"            # not sure why i want a variable for that honestly
+
+quit () {
+	popd > /dev/null # restore user's working directory
+	stty echo        # unhide their keystrokes
+	exit $1          # exit with a given code
+}
 
 error () {
-	popd > /dev/null
-	stty echo
-	exit 1
+	echo "ERROR: $1"
+	quit 1
+}
+
+exist_check () {
+	if [[ -z $1 ]]; then
+		error "package name was not provided!"
+	fi
+
+	grep -w $1 pkg.list > /dev/null 2>&1
+	if [[ $? > 0 ]]; then
+		error "$1 not found in pkg.list! Was it a typo?"
+	fi
 }
 
 write_check () {
@@ -21,26 +37,27 @@ write_check () {
 	ret=$((ret + $?))
 
 	if [[ $ret > 0 ]]; then # if any of the touch's fail
-		echo "ERROR: you cannot write to $FPKGDIR! Please run as root"
-		error
+		error "you cannot write to $FPKGDIR! Please run as root!"
 	fi
 }
+
+# check if $FPKGDIR exists in the first place
+if [[ ! -d $FPKGDIR ]]; then
+	stty echo
+	echo "ERROR: $FPKGDIR does not exist! Create it now? [Y/n]"
+	read choice
+
+	if [[ $choice != "n" ]]; then # so that the default is "yes"
+		mkdir -pv $FPKGDIR/ii     # create the ii one too already
+	fi
+
+	quit 1
+fi
 
 # hide keystrokes, save current directory to go to $FPKGDIR
 stty -echo
 pushd . > /dev/null
 cd $FPKGDIR
-
-if [[ $? != 0 ]]; then
-	echo "ERROR: $FPKGDIR does not exist! Create it now? [Y/n]"
-	read choice
-
-	if [[ choice != "n" ]]; then # so that the default is "yes"
-		mkdir -v $FPKGDIR
-	fi
-
-	error
-fi
 
 case $1 in
 	# refresh every package using git pull
@@ -52,75 +69,85 @@ case $1 in
 			cd $pkg_dir > /dev/null 2>&1
 					
 			if [[ $? != 0 ]]; then
-				echo "ERROR: $pkg_dir does not exist!"
-				echo "Remove its entry with 'fpkg delete' and try again. Aborting..."
-				error
+				error "$pkg_dir does not exist! Remove its entry
+				       with 'fpkg delete' and try again. Aborting..."
 			fi
 
 			echo "$pkg_dir:"
-			git pull
+			git pull --recurse-submodules # where the update itself happens
 			cd - > /dev/null
 		done
 		;;
 
 	# requested the installation of a package?
 	"install" | "i")
-		if [[ -z $2 ]]; then
-			echo "ERROR: package name was not provided!"
-			error
-		fi
+		exist_check $2
 
-		cd ii/
-
-		if [[ $? != 0 ]]; then
-			echo "ERROR: $FPKGDIR/ii/ does not exist! Create it now? [Y/n]"
-			read choice
-
-			if [[ choice != "n" ]]; then
-				mkdir -v ii/
-			fi
-
-			error
-		fi
-
-		./$2.ii
+		./ii/$2.ii
 		;;
 
 	"list" | "l")
 		cat pkg.list
-		echo ""
-		echo "Total: $(cat pkg.list | wc -l)" # get the number of installed packages as well
+		echo -e \\n"Total: $(cat pkg.list | wc -l)" # see how many packages we have too
 		;;
 
 	# adding an entry to the list?
 	"add" | "a")
 		write_check
 
+		exist_check $2
+
 		stty echo
-		echo "Package name:"
-		read pkg_name
-		echo $pkg_name >> pkg.list
-		echo "# Writing installation instructions for package, you can ignore this line" > ii/$pkg_name.ii
-		echo "cd ../<package_dir_here>/" > ii/$pkg_name.ii
-		$EDITOR ii/$pkg_name.ii
-		chmod +x ii/$pkg_name.ii
+		echo $2 >> pkg.list
+		echo -e "# Writing installation instructions for package $2"\\n > ii/$pkg_name.ii
+		$EDITOR ii/$2.ii
+		chmod +x ii/$2.ii
+		;;
+
+	"peek" | "p")
+		exist_check $2
+
+		cat ii/$2.ii
+		;;
+
+	"goto" | "g")
+		stty echo
+	
+		exist_check $2
+
+		export FPKGDIR=$FPKGDIR
+		export PKG_DIR=$2
+		sh -c 'cd $FPKGDIR/$PKG_DIR;
+		       echo "Working on $PKG_DIR/, ^D to exit";
+			   exec "${SHELL:-sh}"'
+		;;
+
+	# editing a package's .ii?
+	"edit" | "e")
+		write_check
+
+		exist_check $2
+
+		stty echo
+
+		$EDITOR ii/$2.ii
 		;;
 
 	# delete an entry from the list?
 	"delete" | "d")
 		write_check
 
-		stty echo
-		echo "Removing:"
-		read pkg_name
-		entry=$(grep -w "^$pkg_name" pkg.list -n | awk -F: '{ print $1 }') # FIXME: is there a better way of doing this?
-		sed -i "$entry"d pkg.list
-		rm ii/$pkg_name.ii
-		echo "$pkg_name removed, would you like to remove its files as well? [y/N]"
-		read file_removal
+		exist_check $2
 
-		if [[ $file_removal = 'y' ]]; then # same thing but with "no"
-			echo "Package directory (relative to /usr/local/fpkg/):"
+		stty echo
+		entry=$(grep -w "^$2" pkg.list -n | awk -F: '{ print $1 }') # get index of the package
+		sed -i "$entry"d pkg.list
+		rm ii/$2.ii
+		echo "$2 removed from pkg.list, would you like to remove its files as well? [y/N]"
+		read choice
+
+		if [[ $choice = 'y' ]]; then # same thing but with "no"
+			echo "Package directory (relative to $FPKGDIR):"
 			read dir
 			rm -rf $dir
 		fi
@@ -128,23 +155,14 @@ case $1 in
 
 	# requested the message of last git commit?
 	"message" | "m")
-		if [[ -z $2 ]]; then
-			echo "ERROR: package name was not provided!"
-			error
-		fi
-
 		if [[ $2 = "-d" ]]; then
-			cd $3
-		else
-			cd $2
+			shift
 		fi
 
-		if [[ $? != 0 ]]; then
-			echo "Package does not exist! Was it a typo?"
-			error
-		fi
+		exist_check $2
+		cd $2
 
-		if [[ $2 = "-d" ]]; then
+		if [[ $1 = "-d" ]]; then
 			git show
 		else
 			echo $(git log -1 --pretty=%B)
@@ -153,32 +171,33 @@ case $1 in
 
 	# requested the version?
 	"version" | "v")
-		echo "fpkg version $VERSION"
+		echo "fpkg - version $VERSION"
 		echo "2024 ruby R53 (https://github.com/ruby-R53)"
 		;;
 
 	# didn't even input a valid action or wants to know
 	# them?
-	"help" | *)
-		echo "Usage: fpkg [action] [package]"
+	"help" | "h" | *)
+		echo "Usage: $0 <action> [package]"
 		echo "Actions:"
 		echo "help | h               - shows this help message"
 		echo "update | u             - git pull every package listed in pkg.list"
-		echo "install | i <pkg>      - install <pkg> using instruction file"
+		echo "install | i <pkg>      - install <pkg> using $FPKGDIR/ii/<pkg>.ii"
 		echo "list | l               - list registered packages"
-		echo "add | a                - register a package"
-		echo "delete | d             - remove a package"
-		echo "message | m [-d] <pkg> - get comment from last git commit of <pkg>. Takes an"
-		echo "                         optional -d for getting the diff"
+		echo "add | a <pkg>          - register <pkg>"
+		echo "peek | p <pkg>         - take a peek at <pkg>'s .ii"
+		echo "goto | g <pkg>         - go to <pkg>'s directory"
+		echo "edit | e <pkg>         - edit <pkg>'s ii file"
+		echo "delete | d <pkg>       - remove <pkg>"
+		echo "message | m [-d] <pkg> - get comment from last commit of <pkg>. Takes an"
+		echo "                         optional -d for getting its diff"
 		echo "version | v            - get fpkg's version"
 
 		if [[ $1 != "help" ]]; then
-			error
+			quit 1
 		fi
 		;;
 esac
 
-# restore the directory, and unhide
-# keystrokes
-popd > /dev/null
-stty echo
+# and the program is done!
+quit 0
