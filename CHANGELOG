@@ -1,3 +1,16 @@
+April 28, 2024:
+- Version 2.1.0 is out!
+- The package manager is stupid, and that's because I am
+  stupid.
+  - Fixed the 'add' command: it checks the argument
+    better now, and can add the package properly.
+	See the diff :)
+  - Added command 'remove': now fpkg is able to uninstall
+  	packages too! Update your .ii's accordingly now!
+- Added a TODO file
+  - So that I can write down stuff I could implement one
+    day
+
 March 25 - April 8, 2024:
 - Version 2.0.0 is out already!
 - Improved error handling some more

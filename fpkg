@@ -3,7 +3,7 @@
 FPKGDIR="/usr/local/fpkg/" # where all packages are located at
 EDIOR="vim"                # change this to your favorite editor
 
-VERSION="2.0.0"            # not sure why i want a variable for that honestly
+VERSION="2.1.0"            # not sure why i want a variable for that honestly
 
 quit () {
 	popd > /dev/null # restore user's working directory
@@ -83,7 +83,13 @@ case $1 in
 	"install" | "i")
 		exist_check $2
 
-		./ii/$2.ii
+		./ii/$2.ii install
+		;;
+
+	"remove" | "r")
+		exist_check $2
+
+		./ii/$2.ii remove
 		;;
 
 	"list" | "l")
@@ -95,12 +101,33 @@ case $1 in
 	"add" | "a")
 		write_check
 
-		exist_check $2
+		if [[ -z $1 ]]; then
+			error "package name was not provided!"
+		fi
 
 		stty echo
+		
+		# add the package to the list
 		echo $2 >> pkg.list
-		echo -e "# Writing installation instructions for package $2"\\n > ii/$pkg_name.ii
+
+		# write a template for it to make it easier for the user
+		echo -e "# Installation instructions for package $2"\\n > ii/$2.ii
+		echo    "# Inside install (), write the commands for" >> ii/$2.ii
+		echo    "# installing the package," >> ii/$2.ii
+		echo    "# and inside remove (), write the commands for" >> ii/$2.ii
+		echo -e "# uninstalling it too."\\n >> ii/$2.ii
+
+		echo -e "install () {"\\n\\n"}"\\n >> ii/$2.ii
+		echo -e "remove () {"\\n\\n"}"\\n >> ii/$2.ii
+
+		# this is necessary for being able to call one of the functions when needed
+		echo "call=\$1; \$call" >> ii/$2.ii
+
+		# open up the text editor so that the user can write on
+		# that template
 		$EDITOR ii/$2.ii
+
+		# finally, make it executable so that fpkg can run it
 		chmod +x ii/$2.ii
 		;;
 
@@ -115,11 +142,12 @@ case $1 in
 	
 		exist_check $2
 
-		export FPKGDIR=$FPKGDIR
-		export PKG_DIR=$2
-		sh -c 'cd $FPKGDIR/$PKG_DIR;
-		       echo "Working on $PKG_DIR/, ^D to exit";
-			   exec "${SHELL:-sh}"'
+		export FPKGDIR    # those are necessary to make it able to start the
+		export PKG_DIR=$2 # shell at the desired directory
+
+		sh -c 'cd $FPKGDIR/$PKG_DIR;                    # change to the directory
+		       echo "Working on $PKG_DIR/, ^D to exit"; # make the user aware of it
+			   exec bash --rcfile $FPKGDIR/.bashrc'     # and here it goes
 		;;
 
 	# editing a package's .ii?
@@ -183,6 +211,7 @@ case $1 in
 		echo "help | h               - shows this help message"
 		echo "update | u             - git pull every package listed in pkg.list"
 		echo "install | i <pkg>      - install <pkg> using $FPKGDIR/ii/<pkg>.ii"
+		echo "remove | r <pkg>       - uninstall <pkg> using $FPKGDIR/ii/<pkg>.ii also"
 		echo "list | l               - list registered packages"
 		echo "add | a <pkg>          - register <pkg>"
 		echo "peek | p <pkg>         - take a peek at <pkg>'s .ii"
