@@ -7,6 +7,9 @@ April 28, 2024:
 	See the diff :)
   - Added command 'remove': now fpkg is able to uninstall
   	packages too! Update your .ii's accordingly now!
+- Improved 'goto'
+  - fpkg will now use a new .bashrc for its shell. Add
+    the new .bashrc to $FPKGDIR!
 - Added a TODO file
   - So that I can write down stuff I could implement one
     day
