@@ -1,7 +1,7 @@
 #!/bin/bash
 
 FPKGDIR="/usr/local/fpkg/" # where all packages are located at
-EDIOR="vim"                # change this to your favorite editor
+EDITOR="vim"               # change this to your favorite editor
 
 VERSION="2.1.1"            # not sure why i want a variable for that honestly
 
