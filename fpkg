@@ -3,7 +3,7 @@
 FPKGDIR="/usr/local/fpkg/" # where all packages are located at
 EDITOR="vim"               # change this to your favorite editor
 
-VERSION="2.1.1"            # not sure why i want a variable for that honestly
+VERSION="2.1.2"            # not sure why i want a variable for that honestly
 
 quit () {
 	popd > /dev/null # restore user's working directory
