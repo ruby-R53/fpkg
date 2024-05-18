@@ -1,3 +1,14 @@
+May 17, 2024:
+- Version 2.1.1 is out!
+  - Finally using that last number for something...
+  - Just an improvement on the formatting at the 
+    'add' section of the code
+  - fpkg itself now already goes to the package's
+    directory, the 'cd' on the .ii's is now not
+	required! Change your .ii's accordingly!
+- Still have to figure out how to do the stuff I
+  put on the TODO list...
+
 April 28, 2024:
 - Version 2.1.0 is out!
 - The package manager is stupid, and that's because I am

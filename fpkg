@@ -3,7 +3,7 @@
 FPKGDIR="/usr/local/fpkg/" # where all packages are located at
 EDIOR="vim"                # change this to your favorite editor
 
-VERSION="2.1.0"            # not sure why i want a variable for that honestly
+VERSION="2.1.1"            # not sure why i want a variable for that honestly
 
 quit () {
 	popd > /dev/null # restore user's working directory
@@ -12,8 +12,8 @@ quit () {
 }
 
 error () {
-	echo "ERROR: $1"
-	quit 1
+	echo "ERROR: $1" # use argument as the error message
+	quit 1           # exit with error
 }
 
 exist_check () {
@@ -83,15 +83,21 @@ case $1 in
 	"install" | "i")
 		exist_check $2
 
-		./ii/$2.ii install
+		cd $2
+
+		$FPKGDIR/ii/$2.ii install
 		;;
 
+	# requested the uninstallation of a package?
 	"remove" | "r")
 		exist_check $2
 
-		./ii/$2.ii remove
+		cd $2
+
+		$FPKGDIR/ii/$2.ii remove
 		;;
 
+	# requested the list of registered packages?
 	"list" | "l")
 		cat pkg.list
 		echo -e \\n"Total: $(cat pkg.list | wc -l)" # see how many packages we have too
@@ -105,20 +111,29 @@ case $1 in
 			error "package name was not provided!"
 		fi
 
+		# make keystrokes visible again
 		stty echo
 		
 		# add the package to the list
 		echo $2 >> pkg.list
 
 		# write a template for it to make it easier for the user
-		echo -e "# Installation instructions for package $2"\\n > ii/$2.ii
-		echo    "# Inside install (), write the commands for" >> ii/$2.ii
-		echo    "# installing the package," >> ii/$2.ii
+		echo -e "# Installation instructions for package $2"\\n  >  ii/$2.ii
+		echo    "# Inside install (), write the commands for"    >> ii/$2.ii
+		echo    "# installing the package,"                      >> ii/$2.ii
 		echo    "# and inside remove (), write the commands for" >> ii/$2.ii
-		echo -e "# uninstalling it too."\\n >> ii/$2.ii
+		echo -e "# uninstalling it too."\\n                      >> ii/$2.ii
+
+		# write a commented out privilege check section so that if
+		# there're any steps requiring elevated privileges a check
+		# is made for it
+		echo -e "#if [[ \$(whoami) != \"root\" ]]; then"             >> ii/$2.ii
+		echo -e "#\\techo \"This action requires root privileges!\"" >> ii/$2.ii
+		echo -e "#\\texit 1"                                         >> ii/$2.ii
+		echo -e "#fi"\\n                                             >> ii/$2.ii
 
 		echo -e "install () {"\\n\\n"}"\\n >> ii/$2.ii
-		echo -e "remove () {"\\n\\n"}"\\n >> ii/$2.ii
+		echo -e "remove () {"\\n\\n"}"\\n  >> ii/$2.ii
 
 		# this is necessary for being able to call one of the functions when needed
 		echo "call=\$1; \$call" >> ii/$2.ii
@@ -131,13 +146,20 @@ case $1 in
 		chmod +x ii/$2.ii
 		;;
 
+	# just checking the .ii?
 	"peek" | "p")
 		exist_check $2
 
 		cat ii/$2.ii
 		;;
 
+	# going to the package's directory?
 	"goto" | "g")
+		# see if we even have the .bashrc to begin with
+		if [[ ! -r $FPKGDIR/.bashrc ]]; then
+			error "your \$FPKGDIR doesn't have an existing or readable .bashrc!"
+		fi
+
 		stty echo
 	
 		exist_check $2
@@ -190,6 +212,7 @@ case $1 in
 		exist_check $2
 		cd $2
 
+		# and its diff?
 		if [[ $1 = "-d" ]]; then
 			git show
 		else
@@ -210,8 +233,8 @@ case $1 in
 		echo "Actions:"
 		echo "help | h               - shows this help message"
 		echo "update | u             - git pull every package listed in pkg.list"
-		echo "install | i <pkg>      - install <pkg> using $FPKGDIR/ii/<pkg>.ii"
-		echo "remove | r <pkg>       - uninstall <pkg> using $FPKGDIR/ii/<pkg>.ii also"
+		echo "install | i <pkg>      - install <pkg> using \$FPKGDIR/ii/<pkg>.ii"
+		echo "remove | r <pkg>       - uninstall <pkg> using \$FPKGDIR/ii/<pkg>.ii also"
 		echo "list | l               - list registered packages"
 		echo "add | a <pkg>          - register <pkg>"
 		echo "peek | p <pkg>         - take a peek at <pkg>'s .ii"
@@ -222,6 +245,8 @@ case $1 in
 		echo "                         optional -d for getting its diff"
 		echo "version | v            - get fpkg's version"
 
+		# exit with error if input wasn't
+		# for the help text
 		if [[ $1 != "help" ]]; then
 			quit 1
 		fi

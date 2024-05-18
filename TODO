@@ -1,7 +1,9 @@
 Stuff I'm thinking of implementing one day:
 - Logging, so that the user can track down when a build fails
 - Dependency checking - I'm really unsure of how I would
-  implement that, though!
+  implement that one, though!
 - Commit history support, so that the user doesn't see only
   the latest commit on the package
+- Insert each registered package in alphabetical order so
+  that pkg.list and related look prettier
 - That's it for now :)
