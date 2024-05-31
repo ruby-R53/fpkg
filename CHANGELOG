@@ -1,3 +1,25 @@
+May 29-30, 2024:
+- Version 3.0.0 is coming! For now, this is what I
+  got for it:
+  - Logging support implemented!
+    - It's a rather sketchy one, but hey, it works
+  - Better handling of `git log`
+    - Only now I discovered about `--no-pager`.
+	  I feel stupid right now. I could have done a
+	  better research on that before.
+  - You can now update individual packages instead
+    of having to refresh all of them at once
+  - You don't need those checks at the beginning of
+    your ii's, I figured a better way of handling
+	that
+	- I should have thought of that before... oh
+	  well, I learn something new every time I 
+	  revisit my code
+  - Commented the code a bit better
+- Two items might get removed from the TODO list.
+  I'm still a n00b, I shouldn't have thought of
+  doing some of the stuff from there...
+
 May 17, 2024:
 - Version 2.1.1 is out!
   - Finally using that last number for something...
