@@ -11,25 +11,46 @@ That is how I call packages not available on the repositories of an user. It can
 
 `pkg.list` contains a newline-separated list of all packages, and you currently have to register them manually. You can easily do this by running `fpkg add`.
 
-This list is currently being used solely for `fpkg` to know which packages it has to update. The update happens by simply issuing a `git pull` inside the selected directory!
+This list is currently being used solely for `fpkg` to know which packages it has to update. The update happens by simply issuing a `git pull` inside the selected directory.
 
-`ii/` contains little scripts written manually (with the help of templates tho') for installation of packages.
+`ii/` contains little scripts written manually (with a template provided) for installing and uninstalling packages. Since not every package uses the same steps for building, that was the solution I came up with. `fpkg add` already redirects you to write those steps using your favorite text editor, though!
 
-Since not every package uses the same steps for building, that was the solution I came up with. `fpkg add` already redirects you to write those steps using your favorite text editor, though!
+### Requirements
 
-### Setup
+You just need basic knowledge on Bash scripting, like knowing what variables are and that's it.
+
+Besides that, you'll also need installed on your system:
+
+- awk
+- coreutils
+- sed
+
+Nothing much, that 2nd item should be installed on every Linux system lol
+
+### Basic setup
 
 Just put the script somewhere in your `$PATH`, I use `/usr/local/bin/` on mine for example.
 
-As for the directory containing all packages, that is literally the first line of code (after the classic `#!/bin/bash` of course). You just change `$FPKGDIR` to whatever you want, and if the directory doesn't exist, `fpkg` will make it for you!
+As for the directory containing all packages, you just change `$FPKGDIR` to whatever you want, and if the directory doesn't exist, `fpkg` will make it for you!
 
 And for the text editor, it's also as simple. Change `$EDITOR` to your favorite text editor.
 
-Then, run `fpkg add` to register and write the .ii's of all the packages you have on your $FPKGDIR.
+Then, run `fpkg add` to register and write the .ii's for all the packages you have on your $FPKGDIR.
 
 And then, you can run `fpkg update` just to check if everything is working and if your stuff is up to date of course.
 
-That's it, you're good to go! And don't forget to run `fpkg help` to know some extra stuff too!
+That's it, you're good to go! And don't forget to run `fpkg help` to get some extra stuff too!
+
+### Logging
+
+This is used to track down the build process of a package, so that if something goes wrong, the user can just open the log file and find out.
+
+On `fpkg`, logging works as follows:
+
+- Two variables, $FPKG_LOG and $LOG_FMT are commented out. They respectively correspond to the location of the log file and the format of the timestamp on the log file.
+- Those variables are commented out by default, disabling the logging feature. To enable it, just uncomment them.
+
+I'm not sure if I keep it this way, it was the best I could think of.
 
 ### Contributing
 
