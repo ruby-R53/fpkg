@@ -1,9 +1,24 @@
 Stuff I'm thinking of implementing one day:
+
 - Logging, so that the user can track down when a build fails
+  - UPDATE (2024/5/30): working on it! For now it's a pretty
+    barebones implementation of it, but hey, it works!
+
 - Dependency checking - I'm really unsure of how I would
   implement that one, though!
+  - UPDATE (2024/5/30): I'm thinking of removing this one
+    from the list. I have no idea on how to do it.
+
 - Commit history support, so that the user doesn't see only
   the latest commit on the package
+  - UPDATE (2024/5/30): working on that one too, but first I
+    really had to fix that handling of `git log` lmao
+  - UPDATE (2024/5/31): implemented! I'm thinking of making
+    git's pretty format customizable too, not really sure
+
 - Insert each registered package in alphabetical order so
   that pkg.list and related look prettier
+  - UPDATE (2024/5/30): I'm thinking of removing this one
+    from the list too. It's just for appearance anyway.
+
 - That's it for now :)
