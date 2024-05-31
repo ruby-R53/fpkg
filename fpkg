@@ -1,21 +1,28 @@
 #!/bin/bash
 
-FPKGDIR="/usr/local/fpkg/" # where all packages are located at
-EDITOR="vim"               # change this to your favorite editor
+FPKGDIR="/usr/local/fpkg" # where all packages are located at
+EDITOR="vim"              # change this to your preferred editor
 
-VERSION="2.1.2"            # not sure why i want a variable for that honestly
+# logging stuff, leave them commented out
+# to keep disabled
+#FPKG_LOG="/tmp/fpkg_log" # log directory, /tmp makes sense to me
+#LOG_FMT="%Y%m%d-%H%M%S"  # the format used to timestamp the log files
+                          # see man page of date for more
 
+# to restore the terminal state and quit with a code
 quit () {
 	popd > /dev/null # restore user's working directory
 	stty echo        # unhide their keystrokes
 	exit $1          # exit with a given code
 }
 
-error () {
+# to display an error and also quit with non-zero
+error () { 
 	echo "ERROR: $1" # use argument as the error message
 	quit 1           # exit with error
 }
 
+# to check if a package exists
 exist_check () {
 	if [[ -z $1 ]]; then
 		error "package name was not provided!"
@@ -27,6 +34,7 @@ exist_check () {
 	fi
 }
 
+# to check if elevated privileges are needed
 write_check () {
 	# get return code to see if we can write to any of the files
 	touch $FPKGDIR > /dev/null 2>&1
@@ -36,12 +44,23 @@ write_check () {
 	touch $FPKGDIR/ii > /dev/null 2>&1
 	ret=$((ret + $?))
 
-	if [[ $ret > 0 ]]; then # if any of the touch's fail
+	# if any of the touch's fail
+	if [[ $ret > 0 ]]; then 
 		error "you cannot write to $FPKGDIR! Please run as root!"
 	fi
 }
 
+# to perform an update
+update () {
+	# not sure if that's a good implementation
+	# of it
+	git pull --recurse-submodules --rebase
+	# and then move to the previous dir
+	cd - > /dev/null
+}
+
 # check if $FPKGDIR exists in the first place
+# else perform an initial setup
 if [[ ! -d $FPKGDIR ]]; then
 	stty echo
 	echo "ERROR: $FPKGDIR does not exist! Create it now? [Y/n]"
@@ -60,53 +79,80 @@ pushd . > /dev/null
 cd $FPKGDIR
 
 case $1 in
-	# refresh every package using git pull
+	# refresh the packages with `git pull'
 	"update" | "u")
-		entries=$(cat pkg.list | wc -l) # how many packages do we have?
+		# no extra arguments? then all packages will be checked
+		if [[ -z $2 ]]; then
+			entries=$(cat pkg.list | wc -l) # how many packages do we have?
 
-		for ((i = 1; i <= $entries; i++)); do
-			pkg_dir=$(head -n $i pkg.list | tail -1)
-			cd $pkg_dir > /dev/null 2>&1
+			for ((i = 1; i <= $entries; i++)); do
+				pkg_dir=$(head -n $i pkg.list | tail -1)
+				cd $pkg_dir > /dev/null 2>&1
 					
-			if [[ $? != 0 ]]; then
-				error "$pkg_dir does not exist! Remove its entry
+				if [[ $? != 0 ]]; then
+					error "$pkg_dir does not exist! Remove its entry
 				       with 'fpkg delete' and try again. Aborting..."
-			fi
+				fi
 
-			echo "$pkg_dir:"
-			git pull --recurse-submodules # where the update itself happens
-			cd - > /dev/null
-		done
-		;;
+				echo "$pkg_dir:"
+				update $pkg_dir
+			done
+		# refreshing just a single package?
+		else
+			exist_check $2 # check if it exists first
+			cd $2		   # change to its directory then
+			update $2	   # and perform the update
+		fi
+	;;
 
 	# requested the installation of a package?
 	"install" | "i")
 		exist_check $2
+		write_check
 
 		cd $2
 
-		$FPKGDIR/ii/$2.ii install
-		;;
+		if [[ $FPKG_LOG && $LOG_FMT ]]; then
+			# check if the log dir exists first
+			# as it's by default inside /tmp
+			if [[ ! -d $FPKG_LOG ]]; then
+				mkdir $FPKG_LOG
+			fi
+
+			# $LOG_FMT gets expanded here for creating the file
+			LOGFILE=$FPKG_LOG/$(printf "$2-%($LOG_FMT)T")
+
+			$FPKGDIR/ii/$2.ii install | tee -a $LOGFILE
+
+			# warn the user about it
+			echo -e \\n"Build log saved to $LOGFILE."
+		else
+			$FPKGDIR/ii/$2.ii install
+		fi
+	;;
 
 	# requested the uninstallation of a package?
 	"remove" | "r")
 		exist_check $2
+		write_check
 
 		cd $2
 
 		$FPKGDIR/ii/$2.ii remove
-		;;
+	;;
 
 	# requested the list of registered packages?
 	"list" | "l")
 		cat pkg.list
+
 		echo -e \\n"Total: $(cat pkg.list | wc -l)" # see how many packages we have too
-		;;
+	;;
 
 	# adding an entry to the list?
 	"add" | "a")
 		write_check
 
+		# and check if we even have a package name
 		if [[ -z $1 ]]; then
 			error "package name was not provided!"
 		fi
@@ -118,25 +164,21 @@ case $1 in
 		echo $2 >> pkg.list
 
 		# write a template for it to make it easier for the user
-		echo -e "# Installation instructions for package $2"\\n  >  ii/$2.ii
+		# i couldn't get a single call to echo to work so i had to
+		# come up with this
+		echo    "# Installation instructions for package $2"     >  ii/$2.ii
 		echo    "# Inside install (), write the commands for"    >> ii/$2.ii
 		echo    "# installing the package,"                      >> ii/$2.ii
 		echo    "# and inside remove (), write the commands for" >> ii/$2.ii
-		echo -e "# uninstalling it too."\\n                      >> ii/$2.ii
-
-		# write a commented out privilege check section so that if
-		# there're any steps requiring elevated privileges a check
-		# is made for it
-		echo -e "#if [[ \$(whoami) != \"root\" ]]; then"             >> ii/$2.ii
-		echo -e "#\\techo \"This action requires root privileges!\"" >> ii/$2.ii
-		echo -e "#\\texit 1"                                         >> ii/$2.ii
-		echo -e "#fi"\\n                                             >> ii/$2.ii
+		echo -e "# uninstalling it too."\\n\\n                   >> ii/$2.ii
 
 		echo -e "install () {"\\n\\n"}"\\n >> ii/$2.ii
 		echo -e "remove () {"\\n\\n"}"\\n  >> ii/$2.ii
 
 		# this is necessary for being able to call one of the functions when needed
-		echo "call=\$1; \$call" >> ii/$2.ii
+		echo "# DO NOT REMOVE! This is used for calling the" >> ii/$2.ii
+		echo "# functions from this ii..."                   >> ii/$2.ii
+		echo "call=\$1; \$call"                              >> ii/$2.ii
 
 		# open up the text editor so that the user can write on
 		# that template
@@ -144,25 +186,25 @@ case $1 in
 
 		# finally, make it executable so that fpkg can run it
 		chmod +x ii/$2.ii
-		;;
+	;;
 
-	# just checking the .ii?
+	# just checking an .ii?
 	"peek" | "p")
 		exist_check $2
 
 		cat ii/$2.ii
-		;;
+	;;
 
 	# going to the package's directory?
 	"goto" | "g")
+		exist_check $2
+
 		# see if we even have the .bashrc to begin with
 		if [[ ! -r $FPKGDIR/.bashrc ]]; then
 			error "your \$FPKGDIR doesn't have an existing or readable .bashrc!"
 		fi
 
 		stty echo
-	
-		exist_check $2
 
 		export FPKGDIR    # those are necessary to make it able to start the
 		export PKG_DIR=$2 # shell at the desired directory
@@ -170,24 +212,22 @@ case $1 in
 		sh -c 'cd $FPKGDIR/$PKG_DIR;                    # change to the directory
 		       echo "Working on $PKG_DIR/, ^D to exit"; # make the user aware of it
 			   exec bash --rcfile $FPKGDIR/.bashrc'     # and here it goes
-		;;
+	;;
 
 	# editing a package's .ii?
 	"edit" | "e")
-		write_check
-
 		exist_check $2
+		write_check
 
 		stty echo
 
 		$EDITOR ii/$2.ii
-		;;
+	;;
 
 	# delete an entry from the list?
 	"delete" | "d")
-		write_check
-
 		exist_check $2
+		write_check
 
 		stty echo
 		entry=$(grep -w "^$2" pkg.list -n | awk -F: '{ print $1 }') # get index of the package
@@ -201,7 +241,7 @@ case $1 in
 			read dir
 			rm -rf $dir
 		fi
-		;;
+	;;
 
 	# requested the message of last git commit?
 	"message" | "m")
@@ -216,15 +256,39 @@ case $1 in
 		if [[ $1 = "-d" ]]; then
 			git show
 		else
-			echo $(git log -1 --pretty=%B)
+			git --no-pager log -1 --pretty="%s: %b"
 		fi
-		;;
+	;;
+
+	# requested the commit history?
+	"history" | "H")
+		# regular expression to check if argument
+		# is a number
+		number_check="^[0-9]+$"
+
+		# shift then
+		if [[ $2 =~ $number_check ]]; then
+			shift
+		fi
+
+		exist_check $2
+		cd $2
+
+		# and change the depth to that
+		if [[ $1 =~ $number_check ]]; then
+			DEPTH=$1
+		else # or not
+			DEPTH=5
+		fi
+
+		git --no-pager log -$DEPTH --pretty="(%cd) %s: %b"
+	;;
 
 	# requested the version?
 	"version" | "v")
-		echo "fpkg - version $VERSION"
-		echo "2024 ruby R53 (https://github.com/ruby-R53)"
-		;;
+		echo "fpkg - version 3.0.0-beta1"
+		echo "ruby R53 (https://github.com/ruby-R53), May 2024"
+	;;
 
 	# didn't even input a valid action or wants to know
 	# them?
@@ -232,7 +296,8 @@ case $1 in
 		echo "Usage: $0 <action> [package]"
 		echo "Actions:"
 		echo "help | h               - shows this help message"
-		echo "update | u             - git pull every package listed in pkg.list"
+		echo "update | u [pkg]       - git pull every package listed in pkg.list, you"
+		echo "                         can optionally update only [pkg] as well"
 		echo "install | i <pkg>      - install <pkg> using \$FPKGDIR/ii/<pkg>.ii"
 		echo "remove | r <pkg>       - uninstall <pkg> using \$FPKGDIR/ii/<pkg>.ii also"
 		echo "list | l               - list registered packages"
@@ -240,9 +305,11 @@ case $1 in
 		echo "peek | p <pkg>         - take a peek at <pkg>'s .ii"
 		echo "goto | g <pkg>         - go to <pkg>'s directory"
 		echo "edit | e <pkg>         - edit <pkg>'s ii file"
-		echo "delete | d <pkg>       - remove <pkg>"
+		echo "delete | d <pkg>       - remove <pkg> from pkg.list"
 		echo "message | m [-d] <pkg> - get comment from last commit of <pkg>. Takes an"
 		echo "                         optional -d for getting its diff"
+		echo "history | H [n] <pkg>  - get <pkg>'s commit history. Takes an optional"
+		echo "                         [n] to get a custom depth. Default is $DEPTH"
 		echo "version | v            - get fpkg's version"
 
 		# exit with error if input wasn't
@@ -250,7 +317,7 @@ case $1 in
 		if [[ $1 != "help" ]]; then
 			quit 1
 		fi
-		;;
+	;;
 esac
 
 # and the program is done!
