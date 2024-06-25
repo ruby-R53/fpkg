@@ -19,7 +19,7 @@ This list is currently being used solely for `fpkg` to know which packages it ha
 
 You just need basic knowledge on Bash scripting, like knowing what variables are and that's it.
 
-Besides that, you'll also need installed on your system:
+Besides that, you'll also need the following:
 
 - awk
 - coreutils
