@@ -1,3 +1,11 @@
+June 24-25, 2024:
+- For now, I've made rather visual upgrades:
+  - Better format for `git log`
+    - Man was that thing from previously ugly loll
+	  Well, now `git log` actually has a *pretty*
+	  output :)
+  - Colored $PS1 for fpkg's shell
+
 May 29-30, 2024:
 - Version 3.0.0 is coming! For now, this is what I
   got for it:
