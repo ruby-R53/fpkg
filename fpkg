@@ -68,15 +68,16 @@ if [[ ! -d $FPKGDIR ]]; then
 
 	if [[ $choice != "n" ]]; then # so that the default is "yes"
 		mkdir -pv $FPKGDIR/ii     # create the ii one too already
+		cp .bashrc $FPKGDIR       # and copy .bashrc to the main dir 
 	fi
 
 	quit 1
 fi
 
-# hide keystrokes, save current directory to go to $FPKGDIR
-stty -echo
-pushd . > /dev/null
-cd $FPKGDIR
+# environment setup
+stty -echo          # hide keystrokes, note that they still get registered
+pushd . > /dev/null # save user's current directory
+cd $FPKGDIR         # so that we can go to $FPKGDIR
 
 case $1 in
 	# refresh the packages with `git pull'
@@ -91,7 +92,7 @@ case $1 in
 					
 				if [[ $? != 0 ]]; then
 					error "$pkg_dir does not exist! Remove its entry
-				       with 'fpkg delete' and try again. Aborting..."
+				    	   with 'fpkg delete' and try again. Aborting..."
 				fi
 
 				echo "$pkg_dir:"
@@ -100,7 +101,7 @@ case $1 in
 		# refreshing just a single package?
 		else
 			exist_check $2 # check if it exists first
-			cd $2		   # change to its directory then
+			cd $2		   # change to its directory if so
 			update $2	   # and perform the update
 		fi
 	;;
@@ -164,13 +165,21 @@ case $1 in
 		echo $2 >> pkg.list
 
 		# write a template for it to make it easier for the user
-		# i couldn't get a single call to echo to work so i had to
-		# come up with this
-		echo    "# Installation instructions for package $2"     >  ii/$2.ii
+		# i couldn't get this to work by using a single call to
+		# echo so i came up with this
+		echo    "# - Installation instructions for package $2 -" >  ii/$2.ii
 		echo    "# Inside install (), write the commands for"    >> ii/$2.ii
 		echo    "# installing the package,"                      >> ii/$2.ii
 		echo    "# and inside remove (), write the commands for" >> ii/$2.ii
 		echo -e "# uninstalling it too."\\n\\n                   >> ii/$2.ii
+		
+		# write a commented out privilege check section so that if
+		# there're any steps requiring elevated privileges a check
+		# is made for it
+		echo -e "#if [[ \$(id -u) != 0 ]]; then"					 >> ii/$2.ii
+		echo -e "#\\techo \"This action requires root privileges!\"" >> ii/$2.ii
+		echo -e "#\\texit 1"                                         >> ii/$2.ii
+		echo -e "#fi"\\n                                             >> ii/$2.ii
 
 		echo -e "install () {"\\n\\n"}"\\n >> ii/$2.ii
 		echo -e "remove () {"\\n\\n"}"\\n  >> ii/$2.ii
@@ -211,7 +220,7 @@ case $1 in
 
 		sh -c 'cd $FPKGDIR/$PKG_DIR;                    # change to the directory
 		       echo "Working on $PKG_DIR/, ^D to exit"; # make the user aware of it
-			   exec bash --rcfile $FPKGDIR/.bashrc'     # and here it goes
+		       exec bash --rcfile $FPKGDIR/.bashrc'     # and here it goes
 	;;
 
 	# editing a package's .ii?
@@ -237,9 +246,7 @@ case $1 in
 		read choice
 
 		if [[ $choice = 'y' ]]; then # same thing but with "no"
-			echo "Package directory (relative to $FPKGDIR):"
-			read dir
-			rm -rf $dir
+			rm -rf $2
 		fi
 	;;
 
@@ -256,7 +263,7 @@ case $1 in
 		if [[ $1 = "-d" ]]; then
 			git show
 		else
-			git --no-pager log -1 --pretty="%s: %b"
+			git --no-pager log -1 --pretty="Who: %cn%nWhat: %s%nDetails: %b"
 		fi
 	;;
 
@@ -266,7 +273,7 @@ case $1 in
 		# is a number
 		number_check="^[0-9]+$"
 
-		# shift then
+		# shift if it is
 		if [[ $2 =~ $number_check ]]; then
 			shift
 		fi
@@ -281,12 +288,12 @@ case $1 in
 			DEPTH=5
 		fi
 
-		git --no-pager log -$DEPTH --pretty="(%cd) %s: %b"
+		git --no-pager log -$DEPTH --pretty="(%cd)%nWho: %cn%nWhat: %s%n%b"
 	;;
 
 	# requested the version?
 	"version" | "v")
-		echo "fpkg - version 3.0.0-beta1"
+		echo "fpkg - version 3.0.0-beta2"
 		echo "ruby R53 (https://github.com/ruby-R53), May 2024"
 	;;
 
@@ -309,7 +316,7 @@ case $1 in
 		echo "message | m [-d] <pkg> - get comment from last commit of <pkg>. Takes an"
 		echo "                         optional -d for getting its diff"
 		echo "history | H [n] <pkg>  - get <pkg>'s commit history. Takes an optional"
-		echo "                         [n] to get a custom depth. Default is $DEPTH"
+		echo "                         [n] to get a custom depth. Defaults to 5"
 		echo "version | v            - get fpkg's version"
 
 		# exit with error if input wasn't
