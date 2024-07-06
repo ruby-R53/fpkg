@@ -11,7 +11,7 @@ EDITOR="vim"              # change this to your preferred editor
 
 # to restore the terminal state and quit with a code
 quit () {
-	popd > /dev/null # restore user's working directory
+	popd > /dev/null # restore user's working directory quietly
 	stty echo        # unhide their keystrokes
 	exit $1          # exit with a given code
 }
@@ -28,7 +28,7 @@ exist_check () {
 		error "package name was not provided!"
 	fi
 
-	grep -w $1 pkg.list > /dev/null 2>&1
+	grep -w $1 pkg.list > /dev/null 2>&1 # running this just to get its return value
 	if [[ $? > 0 ]]; then
 		error "$1 not found in pkg.list! Was it a typo?"
 	fi
@@ -54,7 +54,7 @@ write_check () {
 update () {
 	# not sure if that's a good implementation
 	# of it
-	git pull --recurse-submodules --rebase
+	git pull --recurse-submodules=on-demand --rebase
 	# and then move to the previous dir
 	cd - > /dev/null
 }
@@ -239,14 +239,17 @@ case $1 in
 		write_check
 
 		stty echo
-		entry=$(grep -w "^$2" pkg.list -n | awk -F: '{ print $1 }') # get index of the package
-		sed -i "$entry"d pkg.list
+		entry=$(grep -w "^$2" pkg.list -n | awk -F: '{ print $1 }') # get index number of package
+		sed -i "$entry"d pkg.list # and delete the package using it
 		rm ii/$2.ii
 		echo "$2 removed from pkg.list, would you like to remove its files as well? [y/N]"
 		read choice
 
-		if [[ $choice = 'y' ]]; then # same thing but with "no"
+		if [[ $choice = 'y' ]]; then # same thing but default'ing to "no"
 			rm -rf $2
+			if [[ $? = 0 ]]; then
+				echo "Done"
+			fi
 		fi
 	;;
 
@@ -293,31 +296,31 @@ case $1 in
 
 	# requested the version?
 	"version" | "v")
-		echo "fpkg - version 3.0.0-beta2"
-		echo "ruby R53 (https://github.com/ruby-R53), May 2024"
+		echo "fpkg, version 3.0.0-beta3."
+		echo "Written by ruby R53 (https://github.com/ruby-R53) on July 2024"
 	;;
 
 	# didn't even input a valid action or wants to know
 	# them?
 	"help" | "h" | *)
 		echo "Usage: $0 <action> [package]"
-		echo "Actions:"
-		echo "help | h               - shows this help message"
-		echo "update | u [pkg]       - git pull every package listed in pkg.list, you"
-		echo "                         can optionally update only [pkg] as well"
-		echo "install | i <pkg>      - install <pkg> using \$FPKGDIR/ii/<pkg>.ii"
-		echo "remove | r <pkg>       - uninstall <pkg> using \$FPKGDIR/ii/<pkg>.ii also"
-		echo "list | l               - list registered packages"
-		echo "add | a <pkg>          - register <pkg>"
-		echo "peek | p <pkg>         - take a peek at <pkg>'s .ii"
-		echo "goto | g <pkg>         - go to <pkg>'s directory"
-		echo "edit | e <pkg>         - edit <pkg>'s ii file"
-		echo "delete | d <pkg>       - remove <pkg> from pkg.list"
-		echo "message | m [-d] <pkg> - get comment from last commit of <pkg>. Takes an"
-		echo "                         optional -d for getting its diff"
-		echo "history | H [n] <pkg>  - get <pkg>'s commit history. Takes an optional"
-		echo "                         [n] to get a custom depth. Defaults to 5"
-		echo "version | v            - get fpkg's version"
+		echo "Actions (and their short forms):"
+		echo "(h)elp               - shows this help message"
+		echo "(u)pdate [pkg]       - git pull every package listed in pkg.list, you"
+		echo "                       can optionally update only [pkg] as well"
+		echo "(i)nstall <pkg>      - install <pkg> using \$FPKGDIR/ii/<pkg>.ii"
+		echo "(r)emove <pkg>       - uninstall <pkg> using \$FPKGDIR/ii/<pkg>.ii also"
+		echo "(l)ist               - list registered packages"
+		echo "(a)dd <pkg>          - register <pkg>"
+		echo "(p)eek <pkg>         - take a peek at <pkg>'s .ii"
+		echo "(g)oto <pkg>         - go to <pkg>'s directory"
+		echo "(e)dit <pkg>         - edit <pkg>'s ii file"
+		echo "(d)elete <pkg>       - remove <pkg> from pkg.list"
+		echo "(m)essage [-d] <pkg> - get comment from last commit of <pkg>. Takes an"
+		echo "                       optional -d for getting its diff"
+		echo "(H)istory [n] <pkg>  - get <pkg>'s commit history. Takes an optional"
+		echo "                       [n] to get a custom depth. Defaults to 5"
+		echo "(v)ersion            - get fpkg's version"
 
 		# exit with error if input wasn't
 		# for the help text
