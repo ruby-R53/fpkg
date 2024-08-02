@@ -4,7 +4,7 @@ This name stands for **f**oreign **p**ac**k**a**g**e!
 
 ### And what is a "foreign package"?
 
-That is how I call packages not available on the repositories of an user. It can be from any source but those, although this script currently supports git-based sources only.
+That is how I call packages not available in the default distro repositories of a user. It can be from any source but those, although the script currently supports git-based sources only.
 
 ### How does it work?
 
@@ -12,9 +12,9 @@ That is how I call packages not available on the repositories of an user. It can
 
 `pkg.list` contains a newline-separated list of all packages, and you currently have to register them manually. You can easily do this by running `fpkg add`.
 
-This list is currently being used solely for `fpkg` to know which packages it has to update. The update happens by simply issuing a `git pull` inside the selected directory.
+The list contains the packages to check for update and also a key to check if the package needs to be `pull`ed with `--rebase` or not. A kinda crap way of implementing it, but hey, it works! I'll try improving it in the future.
 
-`ii/` contains little scripts written manually (with a template provided) for installing and uninstalling packages. Since not every package uses the same steps for building, that was the solution I came up with. `fpkg add` already redirects you to write those steps using your favorite text editor, though!
+The `ii` directory contains little scripts written manually (with a template provided of course) for installing and uninstalling packages. Since not every package uses the same steps for building, that was the solution I came up with. `fpkg add` already redirects you to write those steps using your favorite text editor, though!
 
 ### Requirements
 
@@ -30,17 +30,17 @@ Nothing much, that 2nd item should be installed on every Linux system lol
 
 ### Basic setup
 
-Just put the script somewhere in your `$PATH`, I use `/usr/local/bin/` on mine for example.
+1. Just put the script somewhere in your `$PATH`, I use `/usr/local/bin/` on mine for example.
 
-As for the directory containing all packages, you just change `$FPKGDIR` to whatever you want, and if the directory doesn't exist, `fpkg` will make it for you!
+2. As for the directory containing all packages, you just change `$FPKG_DIR` to whatever directory you want, and if doesn't already exist, `fpkg` will make it for you!
 
-And for the text editor, it's also as simple. Change `$EDITOR` to your favorite text editor.
+3. And for the text editor, it's also as simple. Change `$EDITOR` to your favorite text editor.
 
-Then, run `fpkg add` to register and write the .ii's for all the packages you have on your $FPKGDIR.
+4. Then, run `fpkg add` to register and write the .ii's for all the packages you have on your $FPKGDIR.
 
-And then, you can run `fpkg update` just to check if everything is working and if your stuff is up to date of course.
+5. And then, you can run `fpkg update` just to check if everything is working and if your stuff is up to date of course.
 
-That's it, you're good to go! And don't forget to run `fpkg help` to get some extra stuff too!
+6. That's it, you're good to go! And don't forget to run `fpkg help` to get some extra stuff too!
 
 ### Logging
 
@@ -48,7 +48,8 @@ This is used to track down the build process of a package, so that if something 
 
 On `fpkg`, logging works as follows:
 
-- Two variables, $FPKG_LOG and $LOG_FMT are commented out. They respectively correspond to the location of the log file and the format of the timestamp on the log file.
+- Two variables, `$FPKG_LOG` and `$LOG_FMT` are commented out. They respectively correspond to the location of the log file and the format of the timestamp on
+the log file.
 - Those variables are commented out by default, disabling the logging feature. To enable it, just uncomment them.
 
 I'm not sure if I keep it this way, it was the best I could think of.
