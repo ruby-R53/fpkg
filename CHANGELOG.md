@@ -1,3 +1,29 @@
+September 14, 2024:
+- Finally, FINALLY, VERSION 3.0.0 is OUT!!!
+  - `FPKG_DIR` becomes `FPKG_ROOT`!
+    - That naming makes more sense to me, other programs
+      seem to use the same wording when referring to their
+	  working directories...
+
+September 12, 2024:
+- Version 3.0.0 is FINALly coming!!
+  - New feature: fpkg rings the terminal bell when an
+    installation process is finished successfully!
+    - Got this idea from Gentoo's `emerge`, never
+      thought I'd actually care about that terminal
+	  feature lol
+  - More code cleanup
+    - I just learned that Bash can do one-line `if`'s
+      just like in C, that is definitely useful!
+  - I nuked my TODO list :'D
+    - Everything I thought of doing was either finally
+      done or just discarded. Now I ran out of ideas on
+	  what to implement/change.
+
+September 10-11, 2024:
+- A little code cleanup, added some comments and
+  reworded some stuff.
+
 July 28, 2024:
 - Fixed updating with rebase
   - I forgot to add a space when appending the rebase

@@ -1,17 +1,17 @@
 #!/bin/bash
 
 # where all packages are located at
-FPKG_DIR="/usr/local/fpkg"
+FPKG_ROOT="/usr/local/fpkg"
 # change this to your preferred editor
 EDITOR="vim"
 
 # logging stuff, leave them commented out
 # to keep disabled
-#FPKG_LOG="/tmp/fpkg_log" # log directory, /tmp makes sense to me
+#FPKG_LOG="/tmp/fpkg_log" # log directory, /tmp seems to be a good choice
 #LOG_FMT="%Y%m%d-%H%M%S"  # the format used to timestamp the log files
                           # see man page of `date' for more
 
-# to restore the terminal state and quit with a code
+# to restore the terminal state and exit with a code
 quit() {
 	popd > /dev/null # restore user's working directory quietly
 	stty echo        # unhide their keystrokes
@@ -26,30 +26,25 @@ error() {
 
 # to check if a package exists
 exist_check() {
-	if [[ -z $1 ]]; then
-		error "package name was not provided!"
-	fi
+	[[ -z $1 ]] && error "package name was not provided!"
 
-	grep -w $1 pkg.list > /dev/null 2>&1 # running this just to get its return value
-	if [[ $? > 0 ]]; then
-		error "$1 not found in pkg.list! Was it a typo?"
-	fi
+	# checking return type to see if the package exists
+	grep -w $1 pkg.list > /dev/null
+	[[ $? > 0 ]] && error "$1 not found in pkg.list! Was it a typo?"
 }
 
 # to check if elevated privileges are needed
 write_check() {
 	# get return code to see if we can write to any of the files
-	touch $FPKG_DIR > /dev/null 2>&1
+	touch $FPKG_ROOT > /dev/null
 	RET=$((RET + $?))
-	touch $FPKG_DIR/pkg.list > /dev/null 2>&1
+	touch $FPKG_ROOT/pkg.list > /dev/null
 	RET=$((RET + $?))
-	touch $FPKG_DIR/ii > /dev/null 2>&1
+	touch $FPKG_ROOT/ii > /dev/null
 	RET=$((RET + $?))
 
 	# if any of the touch's fail
-	if [[ $RET > 0 ]]; then 
-		error "you cannot write to $FPKG_DIR! Please run as root!"
-	fi
+	[[ $RET > 0 ]] && error "$FPKG_ROOT is unwriteable! Try running as root!"
 }
 
 # to perform an update
@@ -57,36 +52,35 @@ update() {
 	PULL_WITH="--recurse-submodules=on-demand"
 
 	# check if rebase is required
-	if [[ $REBASE = "YES" ]]; then
-		PULL_WITH+=" --rebase"
-	fi
+	[[ $REBASE = "YES" ]] && PULL_WITH+=" --rebase"
 
 	git pull $PULL_WITH
 
-	# and then move to the previous dir
+	# and then go to the previous dir
 	cd - > /dev/null
 }
 
-# check if $FPKG_DIR exists in the first place
+# check if $FPKG_ROOT exists in the first place
 # else perform an initial setup
-if [[ ! -d $FPKG_DIR ]]; then
+if [[ ! -d $FPKG_ROOT ]]; then
 	stty echo
-	echo "ERROR: $FPKG_DIR does not exist! Create it now? [Y/n]"
+	echo "ERROR: $FPKG_ROOT does not exist! Create it now? [Y/n]"
 	read CHOICE
 
 	if [[ $CHOICE != "n" ]]; then # so that the default is "yes"
-		mkdir -pv $FPKG_DIR/ii    # create the ii one too already
-		cp .bashrc $FPKG_DIR      # and copy .bashrc to the main dir 
+		mkdir -pv $FPKG_ROOT/ii    # create the ii one too already
+		cp .bashrc $FPKG_ROOT      # and copy .bashrc to the main dir 
 	fi
 
 	quit 1
 fi
 
 # environment setup
-stty -echo          # hide keystrokes, note that they still get registered
+stty -echo          # hide keystrokes, not sure how to discard them too
 pushd . > /dev/null # save user's current directory
-cd $FPKG_DIR        # so that we can go to $FPKG_DIR
+cd $FPKG_ROOT       # so that we can go to $FPKG_ROOT
 
+# now, parse the command line arguments!
 case $1 in
 	# update all packages with `git pull'
 	"update" | "u")
@@ -97,11 +91,11 @@ case $1 in
 			for ((i = 1; i <= $ENTRIES; i++)); do
 				# a hacky way of getting the package name
 				PKG_DIR=$(head -$i pkg.list | tail -1 | awk -F" " '{ print $1 }')
-				cd $PKG_DIR > /dev/null 2>&1
+				cd $PKG_DIR > /dev/null
 					
 				if [[ $? != 0 ]]; then
 					error "$PKG_DIR does not exist!\\n
-						   Remove its entry with \`fpkg delete' and try again.\\n
+						   Remove its entry with \`fpkg delete' and retry.\\n
 						   Aborting..."
 				fi
 
@@ -114,7 +108,7 @@ case $1 in
 			cd $2		   # change to its directory if so
 
 			# hacky way of checking if a package needs rebase or not
-			export $(grep "$2 REBASE" $FPKG_DIR/pkg.list | awk -F" " '{ print $2 }')
+			export $(grep "$2 REBASE" $FPKG_ROOT/pkg.list | awk -F" " '{ print $2 }')
 			# and perform the update
 			update
 		fi
@@ -127,33 +121,32 @@ case $1 in
 
 		cd $2
 
-		# 10k IQ move here
-		export $(grep INTERACTIVE $FPKG_DIR/ii/$2.ii)
+		# check if the installation requires
+		# interaction with the user
+		export $(grep INTERACTIVE $FPKG_ROOT/ii/$2.ii)
 
-		# if the process requires some
-		# interaction with the user, unhide
-		# the keystrokes here
-		if [[ $INTERACTIVE = "YES" ]]; then
-			stty echo
-		fi
+		# if it does, unhide keystrokes here 
+		[[ $INTERACTIVE = "YES" ]] && stty echo
 
 		if [[ $FPKG_LOG && $LOG_FMT ]]; then
 			# check if the log dir exists first
 			# as it's by default inside /tmp
-			if [[ ! -d $FPKG_LOG ]]; then
-				mkdir $FPKG_LOG
-			fi
+			[[ ! -d $FPKG_LOG ]] && mkdir $FPKG_LOG
 
 			# $LOG_FMT gets expanded here for creating the file
 			LOGFILE=$FPKG_LOG/$(printf "$2-%($LOG_FMT)T")
 
-			$FPKG_DIR/ii/$2.ii install | tee -a $LOGFILE
+			$FPKG_ROOT/ii/$2.ii install | tee -a $LOGFILE
 
 			# warn the user about it
 			echo -e \\n"Build log saved to $LOGFILE."
 		else
-			$FPKG_DIR/ii/$2.ii install
+			$FPKG_ROOT/ii/$2.ii install
 		fi
+
+		# and then, ring the terminal bell when done, that if
+		# the operation has succeeded
+		[[ $? = 0 ]] && tput bel
 	;;
 
 	# requested the uninstallation of a package?
@@ -163,7 +156,7 @@ case $1 in
 
 		cd $2
 
-		$FPKG_DIR/ii/$2.ii remove
+		$FPKG_ROOT/ii/$2.ii remove
 	;;
 
 	# requested the list of registered packages?
@@ -176,17 +169,13 @@ case $1 in
 
 	# adding an entry to the list?
 	"add" | "a")
-		grep -w $2 pkg.list > /dev/null 2>&1
-		if [[ $? = 0 ]]; then
-			error "$2 is already registered!"
-		fi
+		grep -w $2 pkg.list > /dev/null
+		[[ $? = 0 ]] && error "$2 is already registered!"
 
 		write_check
 
 		# and check if we even have a package name
-		if [[ -z $1 ]]; then
-			error "package name was not provided!"
-		fi
+		[[ -z $1 ]] && error "package name was not provided!"
 
 		# make keystrokes visible again
 		stty echo
@@ -220,9 +209,9 @@ case $1 in
 		echo -e "#\\texit 1"                                         >> ii/$2.ii
 		echo -e "#fi"\\n                                             >> ii/$2.ii
 
-		echo    "# Put 'YES' if interaction is required"    >> ii/$2.ii
+		echo    "# Say 'YES' if interaction is required"    >> ii/$2.ii
 		echo    "# to install this package, otherwise keep" >> ii/$2.ii
-		echo    "# this 'NO'. This is required!!"           >> ii/$2.ii
+		echo    "# this 'NO'. Don't remove this line!!"     >> ii/$2.ii
 		echo -e "INTERACTIVE=NO"\\n                         >> ii/$2.ii
 
 		echo -e "install() {"\\n\\n"}"\\n >> ii/$2.ii
@@ -253,18 +242,18 @@ case $1 in
 		exist_check $2
 
 		# see if we even have the .bashrc to begin with
-		if [[ ! -r $FPKG_DIR/.bashrc ]]; then
-			error "your \$FPKG_DIR doesn't have an existing or readable .bashrc!"
+		if [[ ! -r $FPKG_ROOT/.bashrc ]]; then
+			error "no existing or readable .bashrc on \$FPKG_ROOT!"
 		fi
 
 		stty echo
 
-		export FPKG_DIR   # those are necessary to make it able to start the
+		export FPKG_ROOT   # those are necessary to make it able to start the
 		export PKG_DIR=$2 # shell at the desired directory
 
-		sh -c 'cd $FPKG_DIR/$PKG_DIR;                   # change to the directory
+		sh -c 'cd $FPKG_ROOT/$PKG_DIR;                   # go to that directory
 		       echo "Working on $PKG_DIR/, ^D to exit"; # tell the user about it
-		       exec bash --rcfile $FPKG_DIR/.bashrc'    # and here it goes
+		       exec bash --rcfile $FPKG_ROOT/.bashrc'    # and here it goes
 	;;
 
 	# editing a package's .ii?
@@ -285,7 +274,7 @@ case $1 in
 		stty echo
 		# get index number of package
 		ENTRY=$(grep -w "^$2" pkg.list -n | awk -F: '{ print $1 }')
-		sed -i "$ENTRY"d pkg.list # and delete the package using it
+		sed -i "$ENTRY"d pkg.list # and delete the package from it
 		rm ii/$2.ii
 		echo "$2 removed from pkg.list, would you like to remove its files"
 		echo "as well? [y/N]"
@@ -293,17 +282,13 @@ case $1 in
 
 		if [[ $CHOICE = 'y' ]]; then # same thing but default'ing to "no"
 			rm -rf $2
-			if [[ $? = 0 ]]; then
-				echo "Done"
-			fi
+			[[ $? = 0 ]] && echo "Done"
 		fi
 	;;
 
 	# requested the message of last git commit?
 	"message" | "m")
-		if [[ $2 = "-d" ]]; then
-			shift
-		fi
+		[[ $2 = "-d" ]] && shift
 
 		exist_check $2
 		cd $2
@@ -323,9 +308,7 @@ case $1 in
 		NUMBER_CHECK="^[0-9]+$"
 
 		# shift if it is
-		if [[ $2 =~ $NUMBER_CHECK ]]; then
-			shift
-		fi
+		[[ $2 =~ $NUMBER_CHECK ]] && shift
 
 		exist_check $2
 		cd $2
@@ -342,8 +325,9 @@ case $1 in
 
 	# requested the version?
 	"version" | "v")
-		echo "fpkg, version 3.0.0-beta4"
-		echo "Written by ruby R53 (https://github.com/ruby-R53) on July 2024"
+		echo "fpkg, version 3.0.0"
+		echo "Written by ruby R53 (https://github.com/ruby-R53),"
+		echo "September 2024"
 	;;
 
 	# didn't even input a valid action or wants to know
@@ -353,9 +337,9 @@ case $1 in
 		echo "Actions (and their short forms):"
 		echo "(h)elp               - shows this help message"
 		echo "(u)pdate [pkg]       - git pull every package listed in pkg.list, you"
-		echo "                       can optionally update only [pkg] as well"
-		echo "(i)nstall <pkg>      - install <pkg> using \$FPKG_DIR/ii/<pkg>.ii"
-		echo "(r)emove <pkg>       - uninstall <pkg> using \$FPKG_DIR/ii/<pkg>.ii also"
+		echo "                       can also update [pkg] only"
+		echo "(i)nstall <pkg>      - install <pkg> using \$FPKG_ROOT/ii/<pkg>.ii"
+		echo "(r)emove <pkg>       - uninstall <pkg> using \$FPKG_ROOT/ii/<pkg>.ii also"
 		echo "(l)ist               - list registered packages"
 		echo "(a)dd <pkg>          - register <pkg>"
 		echo "(p)eek <pkg>         - take a peek at <pkg>'s .ii"
@@ -363,16 +347,14 @@ case $1 in
 		echo "(e)dit <pkg>         - edit <pkg>'s ii file"
 		echo "(d)elete <pkg>       - remove <pkg> from pkg.list"
 		echo "(m)essage [-d] <pkg> - get comment from last commit of <pkg>. Takes an"
-		echo "                       optional -d for getting its diff"
+		echo "                       optional -d switch to get its diff"
 		echo "(H)istory [n] <pkg>  - get <pkg>'s commit history. Takes an optional"
-		echo "                       [n] to get a custom depth. Defaults to 5"
+		echo "                       number [n] to get a custom depth. Defaults to 5"
 		echo "(v)ersion            - get fpkg's version"
 
-		# exit with error if input wasn't
+		# exit with error code if input wasn't
 		# for the help text
-		if [[ $1 != "help" ]]; then
-			quit 1
-		fi
+		[[ $1 != "help" ]] && quit 1
 	;;
 esac
 
