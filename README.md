@@ -32,7 +32,7 @@ Nothing much, that 2nd item should be installed on every Linux system lol
 
 1. Just put the script somewhere in your `$PATH`, I use `/usr/local/bin/` on mine for example.
 
-2. As for the directory containing all packages, you just change `$FPKG_DIR` to whatever directory you want, and if doesn't already exist, `fpkg` will make it for you!
+2. As for the directory containing all packages, you just change `$FPKG_ROOT` to whatever directory you want, and if doesn't already exist, `fpkg` will make it for you!
 
 3. And for the text editor, it's also as simple. Change `$EDITOR` to your favorite text editor.
 
