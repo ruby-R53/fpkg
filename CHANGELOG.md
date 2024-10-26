@@ -1,3 +1,12 @@
+October 26, 2024:
+- Create `ii/` too if it doesn't already
+  - I realized I create `$FPKG_ROOT` without making `ii/`
+    too sometimes x) and that could be the case for some
+    users too maybe
+- Change terminal title when performing an installation
+  - I actually forgot to put this in the changelog... I
+    implemented it like at the beginning of this month...
+
 September 14, 2024:
 - Finally, FINALLY, VERSION 3.0.0 is OUT!!!
   - `FPKG_DIR` becomes `FPKG_ROOT`!

@@ -75,6 +75,15 @@ if [[ ! -d $FPKG_ROOT ]]; then
 	quit 1
 fi
 
+# also check if ii/ exists too
+if [[ ! -d $FPKG_ROOT/ii ]]; then
+	stty echo
+	echo "WARNING: $FPKG_ROOT/ii does not exist! Creating it now..."
+	mkdir -pv $FPKG_ROOT/ii
+
+	quit 1
+fi
+
 # environment setup
 stty -echo          # hide keystrokes, not sure how to discard them too
 pushd . > /dev/null # save user's current directory
