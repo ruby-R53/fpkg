@@ -29,7 +29,7 @@ exist_check() {
 	[[ -z $1 ]] && error "package name was not provided!"
 
 	# checking return type to see if the package exists
-	grep -w $1 pkg.list > /dev/null
+	grep -w $1 $FPKG_ROOT/pkg.list > /dev/null
 	[[ $? > 0 ]] && error "$1 not found in pkg.list! Was it a typo?"
 }
 
@@ -75,6 +75,16 @@ if [[ ! -d $FPKG_ROOT ]]; then
 	quit 1
 fi
 
+# also check if ii/ exists too
+# in case only the former already existed
+if [[ ! -d $FPKG_ROOT/ii ]]; then
+	stty echo
+	echo "WARNING: $FPKG_ROOT/ii does not exist! Creating it now..."
+	mkdir -pv $FPKG_ROOT/ii
+
+	quit 1
+fi
+
 # environment setup
 stty -echo          # hide keystrokes, not sure how to discard them too
 pushd . > /dev/null # save user's current directory
@@ -107,7 +117,7 @@ case $1 in
 			exist_check $2 # check if it exists first
 			cd $2		   # change to its directory if so
 
-			# hacky way of checking if a package needs rebase or not
+			# weird way of checking if a package needs rebase or not
 			export $(grep "$2 REBASE" $FPKG_ROOT/pkg.list | awk -F" " '{ print $2 }')
 			# and perform the update
 			update
@@ -116,33 +126,45 @@ case $1 in
 
 	# requested the installation of a package?
 	"install" | "i")
-		exist_check $2
-		write_check
+		# check if we got more than one item
+		# to install as well
 
-		cd $2
+		for ((item = 1; item <= $#; item++)); do
+			exist_check $2
+			write_check
 
-		# check if the installation requires
-		# interaction with the user
-		export $(grep INTERACTIVE $FPKG_ROOT/ii/$2.ii)
+			cd $FPKG_ROOT/$2
 
-		# if it does, unhide keystrokes here 
-		[[ $INTERACTIVE = "YES" ]] && stty echo
+			# change window title too so that the user
+			# knows it's running
+			echo -en '\e]0;fpkg: building...\a'
 
-		if [[ $FPKG_LOG && $LOG_FMT ]]; then
-			# check if the log dir exists first
-			# as it's by default inside /tmp
-			[[ ! -d $FPKG_LOG ]] && mkdir $FPKG_LOG
+			# check if the installation requires
+			# interaction with the user
+			export $(grep INTERACTIVE $FPKG_ROOT/ii/$2.ii)
 
-			# $LOG_FMT gets expanded here for creating the file
-			LOGFILE=$FPKG_LOG/$(printf "$2-%($LOG_FMT)T")
+			# if it does, unhide keystrokes here 
+			[[ $INTERACTIVE = "YES" ]] && stty echo
 
-			$FPKG_ROOT/ii/$2.ii install | tee -a $LOGFILE
+			if [[ $FPKG_LOG && $LOG_FMT ]]; then
+				# check if the log dir exists first
+				# as it's by default inside /tmp
+				[[ ! -d $FPKG_LOG ]] && mkdir $FPKG_LOG
 
-			# warn the user about it
-			echo -e \\n"Build log saved to $LOGFILE."
-		else
-			$FPKG_ROOT/ii/$2.ii install
-		fi
+				# $LOG_FMT gets expanded here for creating the file
+				LOGFILE=$FPKG_LOG/$(printf "$2-%($LOG_FMT)T")
+
+				$FPKG_ROOT/ii/$2.ii install | tee -a $LOGFILE
+
+				# warn the user about it
+				echo -e \\n"Build log saved to $LOGFILE."
+			else
+				$FPKG_ROOT/ii/$2.ii install
+			fi
+
+			# move to the next item
+			shift
+		done
 
 		# and then, ring the terminal bell when done, that if
 		# the operation has succeeded

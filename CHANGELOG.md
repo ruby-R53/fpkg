@@ -1,3 +1,28 @@
+November 18, 2024:
+- You can now install multiple items in one command.
+  - Just like in other package managers, you do it here by
+    just running `fpkg i package1 package2 ...`!
+
+October 26, 2024:
+- Create `ii/` too if it doesn't already
+  - I realized I create `$FPKG_ROOT` without making `ii/`
+    too sometimes x) and that could be the case for some
+    users too maybe
+- Change terminal title when performing an installation
+  - I actually forgot to put this in the changelog... I
+    implemented it like at the beginning of this month...
+
+September 14, 2024:
+- Finally, FINALLY, VERSION 3.0.0 is OUT!!!
+  - `FPKG_DIR` becomes `FPKG_ROOT`!
+    - That naming makes more sense to me, other programs
+      seem to use the same wording when referring to their
+	  working directories...
+
+September 26, 2024:
+- The terminal title now changes when fpkg is building your
+  program!
+
 September 14, 2024:
 - Finally, FINALLY, VERSION 3.0.0 is OUT!!!
   - `FPKG_DIR` becomes `FPKG_ROOT`!
