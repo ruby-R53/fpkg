@@ -129,7 +129,7 @@ case $1 in
 		# check if we got more than one item
 		# to install as well
 
-		for ((item = 1; item <= $#; item++)); do
+		for ((item = 0; item <= $#; item++)); do
 			exist_check $2
 			write_check
 
