@@ -129,14 +129,15 @@ case $1 in
 		# check if we got more than one item
 		# to install as well
 
-		for ((item = 0; item <= $#; item++)); do
+		ITEMS=$(($# - 2))
+		for ((ITEM = 0; ITEM <= $ITEMS; ITEM++)); do
 			exist_check $2
 			write_check
 
 			cd $FPKG_ROOT/$2
 
 			# change window title too so that the user
-			# knows it's running
+			# knows it's still running
 			echo -en '\e]0;fpkg: building...\a'
 
 			# check if the installation requires
@@ -148,7 +149,8 @@ case $1 in
 
 			if [[ $FPKG_LOG && $LOG_FMT ]]; then
 				# check if the log dir exists first
-				# as it's by default inside /tmp
+				# and create it accordingly as it's 
+				# by default inside /tmp
 				[[ ! -d $FPKG_LOG ]] && mkdir $FPKG_LOG
 
 				# $LOG_FMT gets expanded here for creating the file
@@ -319,7 +321,11 @@ case $1 in
 		if [[ $1 = "-d" ]]; then
 			git show
 		else
-			git --no-pager log -1 --pretty="Who: %cn%nWhat: %s%nDetails: %b"
+			if [[ -z $(git --no-pager log -1 --pretty="%b") ]]; then
+				git --no-pager log -1 --pretty="Who: %cn%nWhat: %s"
+			else
+				git --no-pager log -1 --pretty="Who: %cn%nWhat: %s%nDetails: %b"
+			fi
 		fi
 	;;
 
@@ -347,9 +353,9 @@ case $1 in
 
 	# requested the version?
 	"version" | "v")
-		echo "fpkg, version 3.0.0"
+		echo "fpkg, version 3.0.1"
 		echo "Written by ruby R53 (https://github.com/ruby-R53),"
-		echo "September 2024"
+		echo "February 2025."
 	;;
 
 	# didn't even input a valid action or wants to know

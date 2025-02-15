@@ -1,3 +1,12 @@
+February 15, 2025:
+- Happy new year!
+- The `Details:` field in `fpkg message` gets hidden if there's
+  no message to show there.
+- Fixed installing multiple packages with a single command.
+  - Apparently it wasn't counting the amount of packages
+    provided properly, and it also gave a "package name
+	not provided" error if you entered only one.
+
 November 18, 2024:
 - You can now install multiple items in one command.
   - Just like in other package managers, you do it here by
