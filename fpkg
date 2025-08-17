@@ -206,7 +206,7 @@ case $1 in
 		
 		# add package to the list
 		echo "Does your package require to be updated with"
-		echo "\`git pull --rebase'? (y/N)"
+		echo -n "\`git pull --rebase'? [y/N]"
 		read CHOICE
 		if [[ $CHOICE = 'y' ]]; then
 			CHOICE="YES"
@@ -266,9 +266,8 @@ case $1 in
 		exist_check $2
 
 		# see if we even have the .bashrc to begin with
-		if [[ ! -r $FPKG_ROOT/.bashrc ]]; then
+		[[ ! -r $FPKG_ROOT/.bashrc ]] &&
 			error "no existing or readable .bashrc on \$FPKG_ROOT!"
-		fi
 
 		stty echo
 
