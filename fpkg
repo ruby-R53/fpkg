@@ -20,8 +20,8 @@ quit() {
 
 # to display an error and also quit with non-zero
 error() { 
-	echo -e "ERROR: $1" # use argument as the error message
-	quit 1              # exit with error
+	echo -e "\e[0;31mERROR\e[0m: $1" # use argument as the error message
+	quit 1 # exit with error code
 }
 
 # to check if a package exists
@@ -64,7 +64,7 @@ update() {
 # else perform an initial setup
 if [[ ! -d $FPKG_ROOT ]]; then
 	stty echo
-	echo "ERROR: $FPKG_ROOT does not exist! Create it now? [Y/n]"
+	echo -en "\e[0;31mERROR\e[0m: $FPKG_ROOT does not exist! Create it now? [Y/n]"
 	read CHOICE
 
 	if [[ $CHOICE != "n" ]]; then # so that the default is "yes"
@@ -79,7 +79,7 @@ fi
 # in case only the former already existed
 if [[ ! -d $FPKG_ROOT/ii ]]; then
 	stty echo
-	echo "WARNING: $FPKG_ROOT/ii does not exist! Creating it now..."
+	echo -e "\e[0;33mWARNING\e[0m: $FPKG_ROOT/ii does not exist! Creating it now..."
 	mkdir -pv $FPKG_ROOT/ii
 
 	quit 1
@@ -109,7 +109,7 @@ case $1 in
 						   Aborting..."
 				fi
 
-				echo "$PKG_DIR:"
+				echo -e "\e[1;37m$PKG_DIR\e[0m:"
 				update
 			done
 		# or updating just a single package?
@@ -168,8 +168,8 @@ case $1 in
 			shift
 		done
 
-		# and then, ring the terminal bell when done, that if
-		# the operation has succeeded
+		# and then, ring the terminal bell when done, and that
+		# if the operation has succeeded
 		[[ $? = 0 ]] && tput bel
 	;;
 
@@ -272,12 +272,12 @@ case $1 in
 
 		stty echo
 
-		export FPKG_ROOT   # those are necessary to make it able to start the
+		export FPKG_ROOT  # those are necessary to make it able to start the
 		export PKG_DIR=$2 # shell at the desired directory
 
-		sh -c 'cd $FPKG_ROOT/$PKG_DIR;                   # go to that directory
+		sh -c 'cd $FPKG_ROOT/$PKG_DIR;                  # go to that directory
 		       echo "Working on $PKG_DIR/, ^D to exit"; # tell the user about it
-		       exec bash --rcfile $FPKG_ROOT/.bashrc'    # and here it goes
+		       exec bash --rcfile $FPKG_ROOT/.bashrc'   # and here it goes
 	;;
 
 	# editing a package's .ii?
@@ -301,10 +301,10 @@ case $1 in
 		sed -i "$ENTRY"d pkg.list # and delete the package from it
 		rm ii/$2.ii
 		echo "$2 removed from pkg.list, would you like to remove its files"
-		echo "as well? [y/N]"
+		echo -n "as well? [y/N]"
 		read CHOICE
 
-		if [[ $CHOICE = 'y' ]]; then # same thing but default'ing to "no"
+		if [[ $CHOICE = 'y' ]]; then # same thing but defaulting to "no"
 			rm -rf $2
 			[[ $? = 0 ]] && echo "Done"
 		fi
@@ -353,15 +353,15 @@ case $1 in
 
 	# requested the version?
 	"version" | "v")
-		echo "fpkg, version 3.0.1"
-		echo "Written by ruby R53 (https://github.com/ruby-R53),"
-		echo "February 2025."
+		echo "fpkg version 3.1.0b,"
+		echo "written by ruby R53 (https://github.com/ruby-R53)"
+		echo "on August 2025."
 	;;
 
 	# didn't even input a valid action or wants to know
 	# them?
 	"help" | "h" | *)
-		echo "Usage: $0 <action> [package]"
+		echo "Usage: $0 <action>"
 		echo "Actions (and their short forms):"
 		echo "(h)elp               - shows this help message"
 		echo "(u)pdate [pkg]       - git pull every package listed in pkg.list, you"
@@ -382,7 +382,7 @@ case $1 in
 
 		# exit with error code if input wasn't
 		# for the help text
-		[[ $1 != "help" ]] && quit 1
+		[[ $1 != "help" ]] && [[ $1 != "h" ]] && quit 1
 	;;
 esac
 
