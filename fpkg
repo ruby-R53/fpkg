@@ -18,17 +18,21 @@ quit() {
 	exit $1          # exit with a given code
 }
 
+# to print a message, with its type highlighted
+# with a color
 msg() {
 	# for compatibility across terminals, use
 	# tput instead of awkward ANSI escape codes
 	tput bold
+
 	if [[ $1 = "ERROR" ]]; then
 		tput setaf 1 # red for error messages
 	elif [[ $1 = "WARNING" ]]; then
-		tput setaf 3 # and yellow for warning ones
+		tput setaf 3 # yellow for warning ones
 	else
-		tput setaf 7 # and white for everything else
+		tput setaf 7 # and white for anything else
 	fi
+
 	echo -n $1
 	tput setaf 7
 	echo -n ": "
@@ -67,18 +71,18 @@ write_check() {
 
 # to perform an update
 update() {
-	PULL_WITH="--recurse-submodules=on-demand"
+	PULL_WITH=(--recurse-submodules=on-demand)
 
 	# check if rebase is required
-	[[ $REBASE = "YES" ]] && PULL_WITH+=" --rebase"
+	[[ $REBASE = "YES" ]] && PULL_WITH+=(--rebase)
 
-	git pull $PULL_WITH
+	git pull ${PULL_WITH[@]}
 
 	# and then go to the previous dir
 	cd - > /dev/null
 }
 
-# check if $FPKG_ROOT exists in the first place
+# check if $FPKG_ROOT exists in the first place,
 # else perform an initial setup
 if [[ ! -d $FPKG_ROOT ]]; then
 	stty echo
@@ -86,14 +90,14 @@ if [[ ! -d $FPKG_ROOT ]]; then
 	read CHOICE
 
 	if [[ $CHOICE != "n" ]]; then # so that the default is "yes"
-		mkdir -pv $FPKG_ROOT/ii    # create the ii one too already
-		cp .bashrc $FPKG_ROOT      # and copy .bashrc to the main dir 
+		mkdir -pv $FPKG_ROOT/ii   # create the ii one too already
+		cp .bashrc $FPKG_ROOT     # and copy .bashrc to the main dir 
 	fi
 
 	quit 1
 fi
 
-# also check if ii/ exists too
+# also check if ii/ exists too,
 # in case only the former already existed
 if [[ ! -d $FPKG_ROOT/ii ]]; then
 	stty echo
@@ -130,7 +134,7 @@ case $1 in
 				msg "$PKG_DIR" ""
 				update
 			done
-		# or updating just a single package?
+		# or update just that particular package
 		else
 			exist_check $2 # check if it exists first
 			cd $2		   # change to its directory if so
@@ -146,8 +150,8 @@ case $1 in
 	"install" | "i")
 		# check if we got more than one item
 		# to install as well
+		ITEMS=$(( $# - 2 )) # compensate for non-packages
 
-		ITEMS=$(( $# - 2 ))
 		for (( ITEM = 0; ITEM <= $ITEMS; ITEM++ )); do
 			exist_check $2
 			write_check
@@ -313,12 +317,13 @@ case $1 in
 		write_check
 
 		stty echo
+
 		# get index number of package
-		ENTRY=$(grep -w "^$2" pkg.list -n | awk -F: '{ print $1 }')
+		ENTRY=$(grep -wn "^$2" pkg.list | awk -F: '{ print $1 }')
 		sed -i "$ENTRY"d pkg.list # and delete the package from it
 		rm ii/$2.ii
 		echo "$2 removed from pkg.list, would you like to remove its files"
-		echo -n "as well? [y/N]"
+		echo -n "as well? [y/N] "
 		read CHOICE
 
 		if [[ $CHOICE = 'y' ]]; then # same thing but defaulting to "no"
