@@ -12,14 +12,20 @@ August 18, 2025:
     It would be a considerable amount of work to do
     however, and I have to figure out how to handle that
     with packages that have `INTERACTIVE=ON`.
-- `remove` now asks you if you want to remove a package from
-  your system as well
+- `remove` now asks you if you want to delete a package's
+  contents from your system as well
   - I actually had the idea of implementing that before, but
     didn't want to for some reason. I changed my mind now.
 - Will the next version be 3.1.0 or 4.0.0??
   - I have some ideas in mind that might change this script by
     relatively a lot. Time will tell if there will be major
     changes or just a bunch of minor ones.
+- Because I ony now realized `tput` is part of ncurses, I also
+  added some checks to see if the user has that installed.
+- fpkg now aborts operation if either `$FPKG_ROOT` or `$EDITOR`
+  are unset.
+  - This is _super_ unlikely, but why not. Who knows what a
+    user will do to your program.
 
 February 15, 2025:
 - Happy new year!
