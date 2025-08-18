@@ -18,9 +18,27 @@ quit() {
 	exit $1          # exit with a given code
 }
 
+msg() {
+	# for compatibility across terminals, use
+	# tput instead of awkward ANSI escape codes
+	tput bold
+	if [[ $1 = "ERROR" ]]; then
+		tput setaf 1 # red for error messages
+	elif [[ $1 = "WARNING" ]]; then
+		tput setaf 3 # and yellow for warning ones
+	else
+		tput setaf 7 # and white for everything else
+	fi
+	echo -n $1
+	tput setaf 7
+	echo -n ": "
+	tput sgr0
+	echo $2
+}
+
 # to display an error and also quit with non-zero
 error() { 
-	echo -e "\e[0;31mERROR\e[0m: $1" # use argument as the error message
+	msg "ERROR" "$1" # then, actually print the error
 	quit 1 # exit with error code
 }
 
@@ -64,7 +82,7 @@ update() {
 # else perform an initial setup
 if [[ ! -d $FPKG_ROOT ]]; then
 	stty echo
-	echo -en "\e[0;31mERROR\e[0m: $FPKG_ROOT does not exist! Create it now? [Y/n]"
+	msg "ERROR" "$FPKG_ROOT does not exist! Create it now? [Y/n] "
 	read CHOICE
 
 	if [[ $CHOICE != "n" ]]; then # so that the default is "yes"
@@ -79,7 +97,7 @@ fi
 # in case only the former already existed
 if [[ ! -d $FPKG_ROOT/ii ]]; then
 	stty echo
-	echo -e "\e[0;33mWARNING\e[0m: $FPKG_ROOT/ii does not exist! Creating it now..."
+	msg "WARNING" "$FPKG_ROOT/ii does not exist! Creating it now..."
 	mkdir -pv $FPKG_ROOT/ii
 
 	quit 1
@@ -98,7 +116,7 @@ case $1 in
 		if [[ -z $2 ]]; then
 			ENTRIES=$(cat pkg.list | wc -l) # how many packages do we have?
 
-			for ((i = 1; i <= $ENTRIES; i++)); do
+			for (( i = 1; i <= $ENTRIES; i++ )); do
 				# a hacky way of getting the package name
 				PKG_DIR=$(head -$i pkg.list | tail -1 | awk -F" " '{ print $1 }')
 				cd $PKG_DIR > /dev/null
@@ -109,7 +127,7 @@ case $1 in
 						   Aborting..."
 				fi
 
-				echo -e "\e[1;37m$PKG_DIR\e[0m:"
+				msg "$PKG_DIR" ""
 				update
 			done
 		# or updating just a single package?
@@ -129,8 +147,8 @@ case $1 in
 		# check if we got more than one item
 		# to install as well
 
-		ITEMS=$(($# - 2))
-		for ((ITEM = 0; ITEM <= $ITEMS; ITEM++)); do
+		ITEMS=$(( $# - 2 ))
+		for (( ITEM = 0; ITEM <= $ITEMS; ITEM++ )); do
 			exist_check $2
 			write_check
 
@@ -185,7 +203,7 @@ case $1 in
 
 	# requested the list of registered packages?
 	"list" | "l")
-		cat pkg.list | awk -F" " '{ print $1 }'
+		awk -F" " '{ print $1 }' pkg.list
 
 		# see how many packages we have too
 		echo -e \\n"Total: $(cat pkg.list | wc -l)"
@@ -360,8 +378,8 @@ case $1 in
 	# didn't even input a valid action or wants to know
 	# them?
 	"help" | "h" | *)
-		echo "Usage: $0 <action>"
-		echo "Actions (and their short forms):"
+		msg "Usage" "$0 <action>"
+		msg "Actions (and their short forms)" ""
 		echo "(h)elp               - shows this help message"
 		echo "(u)pdate [pkg]       - git pull every package listed in pkg.list, you"
 		echo "                       can also update [pkg] only"
