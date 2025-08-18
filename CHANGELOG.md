@@ -12,6 +12,14 @@ August 18, 2025:
     It would be a considerable amount of work to do
     however, and I have to figure out how to handle that
     with packages that have `INTERACTIVE=ON`.
+- `remove` now asks you if you want to remove a package from
+  your system as well
+  - I actually had the idea of implementing that before, but
+    didn't want to for some reason. I changed my mind now.
+- Will the next version be 3.1.0 or 4.0.0??
+  - I have some ideas in mind that might change this script by
+    relatively a lot. Time will tell if there will be major
+    changes or just a bunch of minor ones.
 
 February 15, 2025:
 - Happy new year!

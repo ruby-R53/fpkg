@@ -59,11 +59,11 @@ exist_check() {
 write_check() {
 	# get return code to see if we can write to any of the files
 	touch $FPKG_ROOT > /dev/null
-	RET=$((RET + $?))
+	RET=$(( RET + $? ))
 	touch $FPKG_ROOT/pkg.list > /dev/null
-	RET=$((RET + $?))
+	RET=$(( RET + $? ))
 	touch $FPKG_ROOT/ii > /dev/null
-	RET=$((RET + $?))
+	RET=$(( RET + $? ))
 
 	# if any of the touch's fail
 	[[ $RET > 0 ]] && error "$FPKG_ROOT is unwriteable! Try running as root!"
@@ -100,7 +100,6 @@ fi
 # also check if ii/ exists too,
 # in case only the former already existed
 if [[ ! -d $FPKG_ROOT/ii ]]; then
-	stty echo
 	msg "WARNING" "$FPKG_ROOT/ii does not exist! Creating it now..."
 	mkdir -pv $FPKG_ROOT/ii
 
@@ -203,6 +202,25 @@ case $1 in
 		cd $2
 
 		$FPKG_ROOT/ii/$2.ii remove
+
+		# ask if the user wants to completely remove it
+		# from their system as well
+		if [[ $? = 0 ]]; then
+			stty echo
+			echo "Would you like to remove this package's"
+			echo "entry from pkg.list and its files as"
+			echo -n "well? [y/N] "
+			read CHOICE
+
+			if [[ $CHOICE = 'y' ]]; then # default to 'no' just to be safe
+				# get index number of package
+				ENTRY=$(grep -wn "^$2" pkg.list | awk -F: '{ print $1 }')
+				sed -i "$ENTRY"d pkg.list # and delete the package from it
+				rm ii/$2.ii
+				rm -rf $2
+				[[ $? = 0 ]] && echo "Done!"
+			fi
+		fi
 	;;
 
 	# requested the list of registered packages?
@@ -230,12 +248,12 @@ case $1 in
 		echo "Does your package require to be updated with"
 		echo -n "\`git pull --rebase'? [y/N]"
 		read CHOICE
+
 		if [[ $CHOICE = 'y' ]]; then
-			CHOICE="YES"
+			echo "$2 REBASE=YES" >> pkg.list
 		else
-			CHOICE="NO"
+			echo "$2 REBASE=NO" >> pkg.list
 		fi
-		echo "$2 REBASE=$CHOICE" >> pkg.list
 
 		# write a template for it to make it easier for the user
 		# i couldn't get this to work by using a single call to
