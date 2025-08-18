@@ -1,3 +1,18 @@
+August 18, 2025:
+- Add colors and some other gay shit to the text output
+  - Just a little detail I thought it'd be cool to add,
+    'cos I figured it looked a little dull.
+  - I also updated it to use tput instead of those ANSI
+    escape codes, so that it'd maintain some compatibility
+    across terminals.
+- Should I add a `-[-q]uiet` switch for `install`?
+  - Just like how Gentoo's emerge gives you the option to
+    suppress text output and show a status text instead,
+    I thought this would be nice to implement as well.
+    It would be a considerable amount of work to do
+    however, and I have to figure out how to handle that
+    with packages that have `INTERACTIVE=ON`.
+
 February 15, 2025:
 - Happy new year!
 - The `Details:` field in `fpkg message` gets hidden if there's
