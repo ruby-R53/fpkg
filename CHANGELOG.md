@@ -1,3 +1,16 @@
+August 19, 2025:
+- fpkg now supports printing the commit messages of multiple
+  packages at once
+  - Finally, I've been so lazy to implement this, and here it
+    is.
+- Support for Subversion??
+  - I still have to figure out how this works better. I only
+    have one app that I installed from an svn-based source, so
+    I'm still not very familiar with it.
+  - I also have to figure out how to handle multiple version
+    control programs here··· should I just add another field to
+    `pkg.list`, just like how I did with `REBASE`?
+
 August 18, 2025:
 - Add colors and some other gay shit to the text output
   - Just a little detail I thought it'd be cool to add,

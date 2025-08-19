@@ -154,13 +154,11 @@ case $1 in
 	"install" | "i")
 		# check if we got more than one item
 		# to install as well
-		ITEMS=$(( $# - 2 )) # compensate for non-packages
-
-		for (( ITEM = 0; ITEM <= $ITEMS; ITEM++ )); do
-			exist_check $2
+		for ITEM in ${@:2}; do
+			exist_check $ITEM
 			write_check
 
-			cd $FPKG_ROOT/$2
+			cd $FPKG_ROOT/$ITEM
 
 			# change window title too so that the user
 			# knows it's still running
@@ -168,7 +166,7 @@ case $1 in
 
 			# check if the installation requires
 			# interaction with the user
-			export $(grep INTERACTIVE $FPKG_ROOT/ii/$2.ii)
+			export $(grep INTERACTIVE $FPKG_ROOT/ii/$ITEM.ii)
 
 			# if it does, unhide keystrokes here 
 			[[ $INTERACTIVE = "YES" ]] && stty echo
@@ -180,18 +178,15 @@ case $1 in
 				[[ ! -d $FPKG_LOG ]] && mkdir $FPKG_LOG
 
 				# $LOG_FMT gets expanded here for creating the file
-				LOGFILE=$FPKG_LOG/$(printf "$2-%($LOG_FMT)T")
+				LOGFILE=$FPKG_LOG/$(printf "$ITEM-%($LOG_FMT)T")
 
-				$FPKG_ROOT/ii/$2.ii install | tee -a $LOGFILE
+				$FPKG_ROOT/ii/$ITEM.ii install | tee -a $LOGFILE
 
 				# warn the user about it
 				echo -e \\n"Build log saved to $LOGFILE."
 			else
-				$FPKG_ROOT/ii/$2.ii install
+				$FPKG_ROOT/ii/$ITEM.ii install
 			fi
-
-			# move to the next item
-			shift
 		done
 
 		# and then, ring the terminal bell when done, and that
@@ -359,23 +354,28 @@ case $1 in
 	"message" | "m")
 		[[ $2 = "-d" ]] && shift
 
-		exist_check $2
-		cd $2
+		for ITEM in ${@:2}; do
+			exist_check $ITEM
+			cd $ITEM
 
-		# and its diff?
-		if [[ $1 = "-d" ]]; then
-			git show
-		else
-			git --no-pager log -1 \
-				--pretty="%C(white default bold)Who:%C(reset) %cn"
-			git --no-pager log -1 \
-				--pretty="%C(white default bold)What:%C(reset) %s"
-			# check if we got a commit body to print as well
-			if [[ ! -z $(git --no-pager log -1 --pretty="%b") ]]; then
+			# and its diff?
+			if [[ $1 = "-d" ]]; then
+				git show
+			else
+				[[ $# > 2 ]] && msg "$ITEM" ""
 				git --no-pager log -1 \
-					--pretty="%C(white default bold)Details:%C(reset) %b"
+					--pretty="%C(white default bold)Who:%C(reset) %cn"
+				git --no-pager log -1 \
+					--pretty="%C(white default bold)What:%C(reset) %s"
+				# check if we got a commit body to print as well
+				if [[ ! -z $(git --no-pager log -1 --pretty="%b") ]]; then
+					git --no-pager log -1 \
+						--pretty="%C(white default bold)Details:%C(reset) %b"
+				fi
+				[[ $# > 2 ]] && [[ $ITEM != ${@:$#} ]] && echo
 			fi
-		fi
+			[[ $# > 2 ]] && cd - > /dev/null
+		done
 	;;
 
 	# requested the commit history?
