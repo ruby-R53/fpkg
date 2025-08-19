@@ -87,6 +87,18 @@ update() {
 	cd - > /dev/null
 }
 
+# check if user has at least one of
+# the following VCSes: git and svn
+which git > /dev/null 2>&1
+[[ $? = 0 ]] && HAS_GIT=true
+
+which svn > /dev/null 2>&1
+[[ $? = 0 ]] && HAS_SVN=true
+
+[[ ! $HAS_GIT ]] && [[ ! $HAS_SVN ]] &&
+	error "no compatible VCSes found! \
+	\nTry installing at least one of: git, svn."
+
 if [[ -z $FPKG_ROOT ]] || [[ -z $EDITOR ]]; then
 	# check if we even have a setup
 	msg "ERROR" "\$FPKG_ROOT and/or \$EDITOR unset!"
@@ -234,7 +246,8 @@ case $1 in
 	"list" | "l")
 		awk -F" " '{ print $1 }' pkg.list
 
-		# see how many packages we have too
+		# tell user how many packages in total
+		# they have too
 		echo
 		msg "Total" "$(cat pkg.list | wc -l)"
 	;;
@@ -427,7 +440,8 @@ case $1 in
 			DEPTH=5
 		fi
 
-		git --no-pager log -$DEPTH --pretty="(%cd)%nWho: %cn%nWhat: %s%n%b"
+		PRETTY="%C(white default bold)(%cd)%nWho:%C(reset) %cn%n%C(white default bold)What:%C(reset) %s%n%b%n"
+		git --no-pager log -$DEPTH --pretty="$PRETTY"
 	;;
 
 	# requested the version?

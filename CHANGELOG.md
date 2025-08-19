@@ -1,9 +1,9 @@
 August 19, 2025 (AFTERNOON):
 - Initial support for Subversion implemented!
-  - fpkg is now able to register svn packages and update them.
-    As I'm still not very familiar with that VCS, I have a lot
-    to figure out for it, like showing commit messages (if
-    that's even a thing here as well).
+  - fpkg is now able to register svn-based packages and update
+    them. As I'm still not very familiar with that VCS, I have
+    a lot to figure out for it, like showing commit messages
+    (if that's even a thing there as well).
     - This shit was a lot easier to implement than I thought,
       to be honest··· yet I procrastinated a lot for that to
       finally happen···
@@ -18,6 +18,9 @@ August 19, 2025 (AFTERNOON):
     - I mean, a user may only have packages that come from one
       VCS only, so it'll be pointless to require them to have
       another one installed on their system.
+    - UPDATE: stupidity, there's no need for that. I just added
+      a check to see if the user doesn't have any of the
+      compatible VCSes instead.
 
 August 19, 2025 (MORNING):
 - fpkg now supports printing the commit messages of multiple
