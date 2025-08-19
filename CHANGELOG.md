@@ -13,6 +13,11 @@ August 19, 2025 (AFTERNOON):
       support. It shouldn't be that difficult, but I don't feel
       like doing that now, especially considering I now have to
       learn about SVN's features.
+  - Now that it supports two VCSes, should I make it require
+    only one of them?
+    - I mean, a user may only have packages that come from one
+      VCS only, so it'll be pointless to require them to have
+      another one installed on their system.
 
 August 19, 2025 (MORNING):
 - fpkg now supports printing the commit messages of multiple
