@@ -129,20 +129,17 @@ case $1 in
 	"update" | "u")
 		# no extra arguments? then all packages will be checked
 		if [[ -z $2 ]]; then
-			ENTRIES=$(cat pkg.list | wc -l) # how many packages do we have?
-
-			for (( i = 1; i <= $ENTRIES; i++ )); do
-				# a hacky way of getting the package name
-				PKG_DIR=$(head -$i pkg.list | tail -1 | awk -F" " '{ print $1 }')
-				cd $PKG_DIR > /dev/null
+			ENTRIES=("$(awk -F" " '{ print $1 }' pkg.list | tr '\n' ' ')")
+			for PKG in $ENTRIES; do
+				cd $PKG > /dev/null
 					
 				if [[ $? != 0 ]]; then
-					error "$PKG_DIR does not exist!\\n
+					error "$PKG does not exist!\\n
 						   Remove its entry with \`fpkg delete' and retry.\\n
 						   Aborting..."
 				fi
 
-				msg "$PKG_DIR" ""
+				msg "$PKG" ""
 				update
 			done
 		# or update just that particular package
@@ -261,7 +258,7 @@ case $1 in
 		
 		# add package to the list
 		echo "Does your package require to be updated with"
-		echo -n "\`git pull --rebase'? [y/N]"
+		echo -n "\`git pull --rebase'? [y/N] "
 		read CHOICE
 
 		if [[ $CHOICE = 'y' ]]; then
