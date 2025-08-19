@@ -37,16 +37,17 @@ already ship preinstalled):
 
 - awk
 - coreutils (cat, echo, mkdir, stty)
-- git (duh)
 - grep
 - sed
-- svn (duhh)
+- at least one of: git and svn (duh)
 
-### Basic Setup
+### Setup
 
 1. Just put the script somewhere in your `$PATH`, I use `/usr/local/bin/` on mine for example.
 
 2. As for the directory containing all packages, you just change `$FPKG_ROOT` to whatever directory you want, and if doesn't already exist, `fpkg` will make it for you!
+2.1. Be sure to add the bundled `.bashrc` to that work directory as well. It
+     will be used in fpkg's shell.
 
 3. And for the text editor, it's also as simple. Change `$EDITOR` to your preferred one.
 
