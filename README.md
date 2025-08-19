@@ -18,7 +18,7 @@ The `ii` directory contains little scripts written manually (with a template pro
 
 ### Requirements
 
-You just need Bash and know how variables work in it, pretty much. It's just for changing the script's program calls.
+You just need Bash and know how variables work in it, pretty much. It's just for changing the script's program calls, nothing crazy.
 
 Besides that, you'll also need the following (which most distros should
 already ship preinstalled):
@@ -27,7 +27,6 @@ already ship preinstalled):
 - coreutils (cat, echo, mkdir, stty)
 - git (duh)
 - grep
-- ncurses (optional, for fancier text output)
 - sed
 
 ### Basic Setup
