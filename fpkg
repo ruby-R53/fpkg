@@ -19,30 +19,25 @@ quit() {
 }
 
 # to print a message, with its type highlighted
-# with a color
+# in a color
 msg() {
 	# for compatibility across terminals, use
 	# tput instead of awkward ANSI escape codes
-	tput -V > /dev/null 2>&1 # check if it exists first tho'
-	if [[ $? = 0 ]]; then
-		tput bold
+	tput bold
 
-		if [[ $1 = "ERROR" ]]; then
-			tput setaf 1 # red for error messages
-		elif [[ $1 = "WARNING" ]]; then
-			tput setaf 3 # yellow for warning ones
-		else
-			tput setaf 7 # and white for anything else
-		fi
-
-		echo -n $1
-		tput setaf 7
-		echo -n ": "
-		tput sgr0
-		echo $2
+	if [[ $1 = "ERROR" ]]; then
+		tput setaf 1 # red for error messages
+	elif [[ $1 = "WARNING" ]]; then
+		tput setaf 3 # yellow for warning ones
 	else
-		echo "$1: $2" # fallback
+		tput setaf 7 # and white for anything else
 	fi
+
+	echo -n $1
+	tput setaf 7
+	echo -n ": "
+	tput sgr0
+	echo $2
 }
 
 # to display an error and also quit with non-zero
@@ -201,10 +196,7 @@ case $1 in
 
 		# and then, ring the terminal bell when done, and that
 		# if the operation has succeeded
-		if [[ $? = 0 ]]; then
-			tput -V > /dev/null 2>&1
-			[[ $? = 0 ]] && tput bel
-		fi
+		[[ $? = 0 ]] && tput bel
 	;;
 
 	# requested the uninstallation of a package?
@@ -374,10 +366,14 @@ case $1 in
 		if [[ $1 = "-d" ]]; then
 			git show
 		else
-			if [[ -z $(git --no-pager log -1 --pretty="%b") ]]; then
-				git --no-pager log -1 --pretty="Who: %cn%nWhat: %s"
-			else
-				git --no-pager log -1 --pretty="Who: %cn%nWhat: %s%nDetails: %b"
+			git --no-pager log -1 \
+				--pretty="%C(white default bold)Who:%C(reset) %cn"
+			git --no-pager log -1 \
+				--pretty="%C(white default bold)What:%C(reset) %s"
+			# check if we got a commit body to print as well
+			if [[ ! -z $(git --no-pager log -1 --pretty="%b") ]]; then
+				git --no-pager log -1 \
+					--pretty="%C(white default bold)Details:%C(reset) %b"
 			fi
 		fi
 	;;
@@ -406,7 +402,7 @@ case $1 in
 
 	# requested the version?
 	"version" | "v")
-		echo "fpkg version 3.1.0b,"
+		echo "fpkg version 4.0.0a,"
 		echo "written by ruby R53 (https://github.com/ruby-R53)"
 		echo "on August 2025."
 	;;

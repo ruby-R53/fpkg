@@ -20,12 +20,23 @@ August 18, 2025:
   - I have some ideas in mind that might change this script by
     relatively a lot. Time will tell if there will be major
     changes or just a bunch of minor ones.
-- Because I ony now realized `tput` is part of ncurses, I also
+- Because I only now realized `tput` is part of ncurses, I also
   added some checks to see if the user has that installed.
 - fpkg now aborts operation if either `$FPKG_ROOT` or `$EDITOR`
   are unset.
   - This is _super_ unlikely, but why not. Who knows what a
     user will do to your program.
+- Near-late night update: if you ever feel useless, remember
+  that I added a check for a thing that's literally depended by
+  the very interpreter I'm writing this for.
+  - Yes, only now I discovered that Bash actually depends on
+    ncurses. I really had no idea about that. All that effort
+    for nothing. Oh Well.
+- `message`'s output now has prettier text output as well
+  - Apparently you can set some fancy attributes with git's
+    `--pretty` switch. That's pretty nice. (Not like I tried
+    using `msg()` to try doing that and completely failed, no,
+    that would be so stupid···)
 
 February 15, 2025:
 - Happy new year!
