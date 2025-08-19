@@ -1,4 +1,20 @@
-August 19, 2025:
+August 19, 2025 (AFTERNOON):
+- Initial support for Subversion implemented!
+  - fpkg is now able to register svn packages and update them.
+    As I'm still not very familiar with that VCS, I have a lot
+    to figure out for it, like showing commit messages (if
+    that's even a thing here as well).
+    - This shit was a lot easier to implement than I thought,
+      to be honest··· yet I procrastinated a lot for that to
+      finally happen···
+  - How about other VCSes?
+    - Git and SVN are really the only ones that I know. I'm
+      thinking of making this expandable by adding a plug-in
+      support. It shouldn't be that difficult, but I don't feel
+      like doing that now, especially considering I now have to
+      learn about SVN's features.
+
+August 19, 2025 (MORNING):
 - fpkg now supports printing the commit messages of multiple
   packages at once
   - Finally, I've been so lazy to implement this, and here it
@@ -10,6 +26,10 @@ August 19, 2025:
   - I also have to figure out how to handle multiple version
     control programs here··· should I just add another field to
     `pkg.list`, just like how I did with `REBASE`?
+- Add `-A` to ls' alias entry on .bashrc
+  - Just for the sake of completeness. I also added
+    `--color=auto`, tho' it didn't work on the terminal I
+    tested it on.
 
 August 18, 2025:
 - Add colors and some other gay shit to the text output

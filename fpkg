@@ -37,7 +37,7 @@ msg() {
 	tput setaf 7
 	echo -n ": "
 	tput sgr0
-	echo $2
+	echo -e $2
 }
 
 # to display an error and also quit with non-zero
@@ -71,12 +71,17 @@ write_check() {
 
 # to perform an update
 update() {
-	PULL_WITH=(--recurse-submodules=on-demand)
+	# check what kind of VCS we have
+	if [[ -d ".git/" ]]; then
+		PULL_WITH=(--recurse-submodules=on-demand)
 
-	# check if rebase is required
-	[[ $REBASE = "YES" ]] && PULL_WITH+=(--rebase)
+		# check if rebase is required
+		[[ $REBASE = "YES" ]] && PULL_WITH+=(--rebase)
 
-	git pull ${PULL_WITH[@]}
+		git pull ${PULL_WITH[@]}
+	else
+		svn update
+	fi
 
 	# and then go to the previous dir
 	cd - > /dev/null
@@ -126,7 +131,7 @@ case $1 in
 		if [[ -z $2 ]]; then
 			# get what packages we have
 			ENTRIES=("$(awk -F" " '{ print $1 }' pkg.list | tr '\n' ' ')")
-			for PKG in $ENTRIES; do
+			for PKG in ${ENTRIES[@]}; do
 				cd $PKG > /dev/null
 					
 				if [[ $? != 0 ]]; then
@@ -144,7 +149,9 @@ case $1 in
 			cd $2		   # change to its directory if so
 
 			# weird way of checking if a package needs rebase or not
-			export $(grep "$2 REBASE" $FPKG_ROOT/pkg.list | awk -F" " '{ print $2 }')
+			[[ -d ".git/" ]] &&
+				export \
+				$(grep "$2 REBASE" $FPKG_ROOT/pkg.list | awk -F" " '{ print $2 }')
 			# and perform the update
 			update
 		fi
@@ -228,31 +235,54 @@ case $1 in
 		awk -F" " '{ print $1 }' pkg.list
 
 		# see how many packages we have too
-		echo -e \\n"Total: $(cat pkg.list | wc -l)"
+		echo
+		msg "Total" "$(cat pkg.list | wc -l)"
 	;;
 
 	# adding an entry to the list?
 	"add" | "a")
+		# check if we even have the package's name first
+		[[ -z $2 ]] && error "package name was not provided!"
+
+		# then, check if we have the directory for the
+		# requested package
+		[[ ! -d $FPKG_ROOT/$2 ]] &&
+			error "directory not found for package! \
+			\nWas it a typo?"
+
+		# check if version control type is supported by
+		# this script too
+		[[ ! -d $FPKG_ROOT/$2/.git ]] &&
+		[[ ! -d $FPKG_ROOT/$2/.svn ]] &&
+			error "incompatible version control system! \
+			\nSupported ones are: git, svn."
+
 		grep -w $2 pkg.list > /dev/null
 		[[ $? = 0 ]] && error "$2 is already registered!"
 
 		write_check
 
-		# and check if we even have a package name
-		[[ -z $1 ]] && error "package name was not provided!"
-
 		# make keystrokes visible again
 		stty echo
 		
 		# add package to the list
-		echo "Does your package require to be updated with"
-		echo -n "\`git pull --rebase'? [y/N] "
-		read CHOICE
+		tput bold; tput setaf 6
+		echo -n "Detected VCS: " # tell the user about it prettily
+		tput sgr0
+		if [[ -d $FPKG_ROOT/$2/.git ]]; then
+			echo "Git"
+			echo "Does your package require to be updated with"
+			echo -n "\`git pull --rebase'? [y/N] "
+			read CHOICE
 
-		if [[ $CHOICE = 'y' ]]; then
-			echo "$2 REBASE=YES" >> pkg.list
+			if [[ $CHOICE = 'y' ]]; then
+				echo "$2 REBASE=YES" >> pkg.list
+			else
+				echo "$2 REBASE=NO" >> pkg.list
+			fi
 		else
-			echo "$2 REBASE=NO" >> pkg.list
+			echo "Subversion"
+			echo "$2" >> pkg.list
 		fi
 
 		# write a template for it to make it easier for the user
