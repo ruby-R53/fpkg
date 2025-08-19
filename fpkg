@@ -129,6 +129,7 @@ case $1 in
 	"update" | "u")
 		# no extra arguments? then all packages will be checked
 		if [[ -z $2 ]]; then
+			# get what packages we have
 			ENTRIES=("$(awk -F" " '{ print $1 }' pkg.list | tr '\n' ' ')")
 			for PKG in $ENTRIES; do
 				cd $PKG > /dev/null
