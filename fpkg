@@ -52,7 +52,9 @@ exist_check() {
 
 	# checking return type to see if the package exists
 	grep -w $1 $FPKG_ROOT/pkg.list > /dev/null
-	[[ $? > 0 ]] && error "$1 not found in pkg.list! Was it a typo?"
+	[[ $? > 0 ]] &&
+		error "$1 not found in pkg.list! \
+		\nWas it a typo?"
 }
 
 # to check if elevated privileges are needed
@@ -66,7 +68,9 @@ write_check() {
 	RET=$(( RET + $? ))
 
 	# if any of the touch's fail
-	[[ $RET > 0 ]] && error "$FPKG_ROOT is unwriteable! Try running as root!"
+	[[ $RET > 0 ]] &&
+		error "$FPKG_ROOT is unwriteable! \
+		\nTry running as root!"
 }
 
 # to perform an update
@@ -131,7 +135,8 @@ fi
 # also check if ii/ exists too,
 # in case only the former already existed
 if [[ ! -d $FPKG_ROOT/ii ]]; then
-	msg "WARNING" "$FPKG_ROOT/ii does not exist! Creating it now..."
+	msg "WARNING" "$FPKG_ROOT/ii does not exist!"
+	echo "Creating it now..."
 	mkdir -pv $FPKG_ROOT/ii
 
 	quit 1
@@ -149,9 +154,9 @@ case $1 in
 				cd $PKG > /dev/null
 					
 				if [[ $? != 0 ]]; then
-					error "$PKG does not exist!\\n
-						   Remove its entry with \`fpkg delete' and retry.\\n
-						   Aborting..."
+					error "$PKG does not exist! \
+						   \nRemove its entry with \`fpkg delete' and retry. \
+						   \nAborting..."
 				fi
 
 				msg "$PKG" ""
@@ -235,7 +240,7 @@ case $1 in
 
 			if [[ $CHOICE = 'y' ]]; then # default to 'no' just to be safe
 				# get index number of package
-				ENTRY=$(grep -wn "^$2" pkg.list | awk -F: '{ print $1 }')
+				ENTRY=$(grep -wn "^$2" pkg.list | awk -F":" '{ print $1 }')
 				sed -i "$ENTRY"d pkg.list # and delete the package from it
 				rm ii/$2.ii
 				rm -rf $2
@@ -326,7 +331,8 @@ case $1 in
 		echo -e "install() {"\\n\\n"}"\\n >> ii/$2.ii
 		echo -e "remove() {"\\n\\n"}"\\n  >> ii/$2.ii
 
-		# this is necessary for being able to call one of the functions when needed
+		# this is necessary for being able to call one of the
+		# functions when needed
 		echo "# DO NOT REMOVE! This is used for calling the" >> ii/$2.ii
 		echo "# functions from this ii..."                   >> ii/$2.ii
 		echo "call=\$1; \$call"                              >> ii/$2.ii
@@ -359,9 +365,11 @@ case $1 in
 		export FPKG_ROOT  # those are necessary to make it able to start the
 		export PKG_DIR=$2 # shell at the desired directory
 
-		sh -c 'cd $FPKG_ROOT/$PKG_DIR;                  # go to that directory
-		       echo "Working on $PKG_DIR/, ^D to exit"; # tell the user about it
-		       exec bash --rcfile $FPKG_ROOT/.bashrc'   # and here it goes
+		# go to that directory
+		# and tell the user about it
+		sh -c 'cd $FPKG_ROOT/$PKG_DIR;
+		       echo "Working on $PKG_DIR/, ^D to exit";
+		       exec bash --rcfile $FPKG_ROOT/.bashrc' # and here it goes
 	;;
 
 	# editing a package's .ii?
