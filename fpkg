@@ -343,7 +343,7 @@ case $1 in
 		$EDITOR ii/$2.ii
 
 		# finally, make it executable so that fpkg can run it
-		chmod -c +x ii/$2.ii
+		chmod +x ii/$2.ii
 		# and we're done
 		echo "Done."
 	;;
