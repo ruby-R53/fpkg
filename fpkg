@@ -80,7 +80,9 @@ update() {
 
 		git pull ${PULL_WITH[@]}
 	else
-		svn update
+		# don't print that "Updating"
+		# line, make it a lil' cleaner
+		svn update | tail -n+2
 	fi
 
 	# and then go to the previous dir
@@ -88,10 +90,10 @@ update() {
 }
 
 # check if user has at least one of
-# the following VCSes: git and svn
+# the following VCSes: git
 which git > /dev/null 2>&1
 [[ $? = 0 ]] && HAS_GIT=true
-
+# and svn
 which svn > /dev/null 2>&1
 [[ $? = 0 ]] && HAS_SVN=true
 
@@ -401,21 +403,35 @@ case $1 in
 			exist_check $ITEM
 			cd $ITEM
 
-			# and its diff?
-			if [[ $1 = "-d" ]]; then
-				git show
-			else
-				[[ $# > 2 ]] && msg "$ITEM" ""
-				git --no-pager log -1 \
-					--pretty="%C(white default bold)Who:%C(reset) %cn"
-				git --no-pager log -1 \
-					--pretty="%C(white default bold)What:%C(reset) %s"
-				# check if we got a commit body to print as well
-				if [[ ! -z $(git --no-pager log -1 --pretty="%b") ]]; then
-					git --no-pager log -1 \
-						--pretty="%C(white default bold)Details:%C(reset) %b"
+			if [[ -d ".git/" ]]; then
+				# and its diff?
+				if [[ $1 = "-d" ]]; then
+					git show
+				else
+					[[ $# > 2 ]] && msg "$ITEM" ""
+					# our message format for git
+					PRETTY=("%C(white default bold)Who:%C(reset) %cn"
+						"%n%C(white default bold)What:%C(reset) %s")
+
+					# check if we got a commit body to print as well
+					[[ ! -z $(git --no-pager log -1 --pretty="%b") ]] &&
+						PRETTY+=("%n%C(white default bold)Details:%C(reset) %b")
+					git --no-pager log -1 --pretty="${PRETTY[*]}"
+					# also print a blank line unless it's the last
+					# message on the list
+					[[ $# > 2 ]] &&
+						[[ $ITEM != ${@:$#} ]] && echo
 				fi
-				[[ $# > 2 ]] && [[ $ITEM != ${@:$#} ]] && echo
+			else
+				# remove those hyphens at the top and
+				# bottom of the output as well
+				# or add a pager to the diff output like
+				# in git's as well
+				if [[ $1 = "-d" ]]; then
+					svn log -l1 -v --diff | less -F
+				else
+					svn log -l1 -v | head -n-1 | tail -n+2
+				fi
 			fi
 			[[ $# > 2 ]] && cd - > /dev/null
 		done
@@ -440,14 +456,23 @@ case $1 in
 			DEPTH=5
 		fi
 
-		PRETTY="%C(white default bold)(%cd)%nWho:%C(reset) %cn%n%C(white default bold)What:%C(reset) %s%n%b%n"
-		git --no-pager log -$DEPTH --pretty="$PRETTY"
+		if [[ -r ".git/" ]]; then
+			PRETTY=("%C(white default bold)(%cd)"
+				"%nWho:%C(reset) %cn"
+				"%n%C(white default bold)What:%C(reset) %s"
+				"%n%b")
+			git --no-pager log -$DEPTH --pretty="${PRETTY[*]}"
+		else
+			svn log -l$DEPTH -v | head -n-1 | tail -n+2
+		fi
 	;;
 
 	# requested the version?
 	"version" | "v")
-		echo "fpkg version 4.0.0a,"
-		echo "written by ruby R53 (https://github.com/ruby-R53)"
+		tput bold
+		echo "fpkg v4.0.0a"
+		tput sgr0
+		echo "written by ruby (https://github.com/ruby-R53),"
 		echo "on August 2025."
 	;;
 

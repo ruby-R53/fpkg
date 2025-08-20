@@ -1,3 +1,10 @@
+August 20, 2025:
+- `message` & `history` now support Subversion as well
+  - I'm not satisfied with the former's results tho'··· I
+    wanted its output to be on the same format as git's, but
+    then I figured it'd be a pain to figure that out. I might
+    come back at it later tho'.
+
 August 19, 2025 (AFTERNOON):
 - Initial support for Subversion implemented!
   - fpkg is now able to register svn-based packages and update
