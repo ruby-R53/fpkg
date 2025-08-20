@@ -144,7 +144,8 @@ fi
 
 # now, parse the command line arguments!
 case $1 in
-	# update all packages with `git pull'
+	# refresh all packages using their
+	# source VCS' tool
 	"update" | "u")
 		# no extra arguments? then all packages will be checked
 		if [[ -z $2 ]]; then
@@ -342,7 +343,9 @@ case $1 in
 		$EDITOR ii/$2.ii
 
 		# finally, make it executable so that fpkg can run it
-		chmod +x ii/$2.ii
+		chmod -c +x ii/$2.ii
+		# and we're done
+		echo "Done."
 	;;
 
 	# just checking an .ii?
