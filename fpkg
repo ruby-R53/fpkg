@@ -371,7 +371,7 @@ case $1 in
 		# go to that directory
 		# and tell the user about it
 		sh -c 'cd $FPKG_ROOT/$PKG_DIR;
-		       echo "Working on $PKG_DIR/, ^D to exit";
+		       echo "Working on $PKG_DIR/, hit ^D to exit";
 		       exec bash --rcfile $FPKG_ROOT/.bashrc' # and here it goes
 	;;
 
@@ -500,10 +500,11 @@ case $1 in
 		echo "(r)emove <pkg>       - uninstall <pkg> using \$FPKG_ROOT/ii/<pkg>.ii also"
 		echo "(l)ist               - list registered packages"
 		echo "(a)dd <pkg>          - register <pkg>"
-		echo "(p)eek <pkg>         - take a peek at <pkg>'s .ii"
-		echo "(g)oto <pkg>         - go to <pkg>'s directory"
-		echo "(e)dit <pkg>         - edit <pkg>'s ii file"
-		echo "(d)elete <pkg>       - remove <pkg> from pkg.list"
+		echo "(p)eek <pkg>         - peek into <pkg>'s .ii"
+		echo "(g)oto <pkg>         - start a shell at <pkg>'s directory"
+		echo "(e)dit <pkg>         - edit <pkg>'s ii"
+		echo "(d)elete <pkg>       - remove <pkg> from pkg.list, you may also delete"
+		echo "                       its files as well"
 		echo "(m)essage [-d] <pkg> - get comment from last commit of <pkg>. Takes an"
 		echo "                       optional -d switch to get its diff, and you may"
 		echo "                       specify multiple packages as well"
