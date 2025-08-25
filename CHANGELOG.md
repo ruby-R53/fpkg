@@ -1,11 +1,20 @@
-August 20, 2025:
+**August 25, 2025:**
+- `switch` implemented for switching branches!
+  - Why didn't I think of this before? I dunno. Maybe because
+    I don't switch branches on my packages so often. But other
+    people, especially other devs, might.
+- `peek` now uses `less -F` instead of `cat`
+  - Who knows if the user has wrote a bunch of stuff to their
+    ii. This approach is a little bit slower, however.
+
+**August 20, 2025:**
 - `message` & `history` now support Subversion as well
   - I'm not satisfied with the former's results tho'··· I
     wanted its output to be on the same format as git's, but
     then I figured it'd be a pain to figure that out. I might
     come back at it later tho'.
 
-August 19, 2025 (AFTERNOON):
+**August 19, 2025 (AFTERNOON):**
 - Initial support for Subversion implemented!
   - fpkg is now able to register svn-based packages and update
     them. As I'm still not very familiar with that VCS, I have
@@ -29,7 +38,7 @@ August 19, 2025 (AFTERNOON):
       a check to see if the user doesn't have any of the
       compatible VCSes instead.
 
-August 19, 2025 (MORNING):
+**August 19, 2025 (MORNING):**
 - fpkg now supports printing the commit messages of multiple
   packages at once
   - Finally, I've been so lazy to implement this, and here it
@@ -46,7 +55,7 @@ August 19, 2025 (MORNING):
     `--color=auto`, tho' it didn't work on the terminal I
     tested it on.
 
-August 18, 2025:
+**August 18, 2025:**
 - Add colors and some other gay shit to the text output
   - Just a little detail I thought it'd be cool to add,
     'cos I figured it looked a little dull.
@@ -86,7 +95,7 @@ August 18, 2025:
     using `msg()` to try doing that and completely failed, no,
     that would be so stupid···)
 
-February 15, 2025:
+**February 15, 2025:**
 - Happy new year!
 - The `Details:` field in `fpkg message` gets hidden if there's
   no message to show there.
@@ -95,12 +104,12 @@ February 15, 2025:
     provided properly, and it also gave a "package name
 	not provided" error if you entered only one.
 
-November 18, 2024:
+**November 18, 2024:**
 - You can now install multiple items in one command.
   - Just like in other package managers, you do it here by
     just running `fpkg i package1 package2 ...`!
 
-October 26, 2024:
+**October 26, 2024:**
 - Create `ii/` too if it doesn't already
   - I realized I create `$FPKG_ROOT` without making `ii/`
     too sometimes x) and that could be the case for some
@@ -109,25 +118,25 @@ October 26, 2024:
   - I actually forgot to put this in the changelog... I
     implemented it like at the beginning of this month...
 
-September 14, 2024:
+**September 14, 2024:**
 - Finally, FINALLY, VERSION 3.0.0 is OUT!!!
   - `FPKG_DIR` becomes `FPKG_ROOT`!
     - That naming makes more sense to me, other programs
       seem to use the same wording when referring to their
 	  working directories...
 
-September 26, 2024:
+**September 26, 2024:**
 - The terminal title now changes when fpkg is building your
   program!
 
-September 14, 2024:
+**September 14, 2024:**
 - Finally, FINALLY, VERSION 3.0.0 is OUT!!!
   - `FPKG_DIR` becomes `FPKG_ROOT`!
     - That naming makes more sense to me, other programs
       seem to use the same wording when referring to their
 	  working directories...
 
-September 12, 2024:
+**September 12, 2024:**
 - Version 3.0.0 is FINALly coming!!
   - New feature: fpkg rings the terminal bell when an
     installation process is finished successfully!
@@ -142,28 +151,28 @@ September 12, 2024:
       done or just discarded. Now I ran out of ideas on
 	  what to implement/change.
 
-September 10-11, 2024:
+**September 10-11, 2024:**
 - A little code cleanup, added some comments and
   reworded some stuff.
 
-July 28, 2024:
+**July 28, 2024:**
 - Fixed updating with rebase
   - I forgot to add a space when appending the rebase
     option to `git pull` :sob:
   - Plus forgot the `$` prefix for the rebase flag
 
-July 23, 2024:
+**July 23, 2024:**
 - More cleanup in the code
   - I barely test the `add` command :sob: so I
     fixed some formatting stuff.
 
-July 21, 2024:
+**July 21, 2024:**
 - Some cleanup on the code
   - Just placing some comments better and also
     formatting some stuff better. More consistent
 	casing for variables and stuff.
 
-July 20, 2024:
+**July 20, 2024:**
 - Some more significant changes!!
   - Now `fpkg` doesn't pull with `rebase` every
     single time, instead it asks you if your
@@ -195,7 +204,7 @@ July 20, 2024:
 	  stuff that it had before and now I'm gonna
 	  focus on more feasible goals.
 
-June 24-25, 2024:
+**June 24-25, 2024:**
 - For now, I've made rather visual upgrades:
   - Better format for `git log`
     - Man was that thing from previously ugly loll
@@ -203,7 +212,7 @@ June 24-25, 2024:
 	  output :)
   - Colored $PS1 for fpkg's shell
 
-May 29-30, 2024:
+**May 29-30, 2024:**
 - Version 3.0.0 is coming! For now, this is what I
   got for it:
   - Logging support implemented!
@@ -225,7 +234,7 @@ May 29-30, 2024:
   I'm still a n00b, I shouldn't have thought of
   doing some of the stuff from there...
 
-May 17, 2024:
+**May 17, 2024:**
 - Version 2.1.1 is out!
   - Finally using that last number for something...
   - Just an improvement on the formatting at the 
@@ -236,7 +245,7 @@ May 17, 2024:
 - Still have to figure out how to do the stuff I
   put on the TODO list...
 
-April 28, 2024:
+**April 28, 2024:**
 - Version 2.1.0 is out!
 - The package manager is stupid, and that's because I am
   stupid.
@@ -252,7 +261,7 @@ April 28, 2024:
   - So that I can write down stuff I could implement one
     day
 
-March 25 - April 8, 2024:
+**March 25 - April 8, 2024:**
 - Version 2.0.0 is out already!
 - Improved error handling some more
 - Changed 'add' and 'delete' actions to take the package
@@ -276,7 +285,7 @@ March 25 - April 8, 2024:
     'cd <pkg>/' instead of 'cd ../<pkg>/', change your
 	.ii's accordingly!
 
-March 19, 2024:
+**March 19, 2024:**
 - Added a versioning scheme, first release
   - major.minor.revision -> 1.0.0
   - major: +1 when the entire program is changed

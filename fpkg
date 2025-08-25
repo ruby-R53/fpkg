@@ -175,7 +175,7 @@ case $1 in
 			# and perform the update
 			update
 		fi
-	;;
+		;;
 
 	# requested the installation of a package?
 	"install" | "i")
@@ -219,7 +219,7 @@ case $1 in
 		# and then, ring the terminal bell when done, and that
 		# if the operation has succeeded
 		[[ $? = 0 ]] && tput bel
-	;;
+		;;
 
 	# requested the uninstallation of a package?
 	"remove" | "r")
@@ -248,7 +248,7 @@ case $1 in
 				[[ $? = 0 ]] && echo "Done!"
 			fi
 		fi
-	;;
+		;;
 
 	# requested the list of registered packages?
 	"list" | "l")
@@ -258,7 +258,7 @@ case $1 in
 		# they have too
 		echo
 		msg "Total" "$(cat pkg.list | wc -l)"
-	;;
+		;;
 
 	# adding an entry to the list?
 	"add" | "a")
@@ -346,14 +346,14 @@ case $1 in
 		chmod +x ii/$2.ii
 		# and we're done
 		echo "Done."
-	;;
+		;;
 
 	# just checking an .ii?
 	"peek" | "p")
 		exist_check $2
 
-		cat ii/$2.ii
-	;;
+		less -F ii/$2.ii
+		;;
 
 	# going to the package's directory?
 	"goto" | "g")
@@ -373,7 +373,7 @@ case $1 in
 		sh -c 'cd $FPKG_ROOT/$PKG_DIR;
 		       echo "Working on $PKG_DIR/, hit ^D to exit";
 		       exec bash --rcfile $FPKG_ROOT/.bashrc' # and here it goes
-	;;
+		;;
 
 	# editing a package's .ii?
 	"edit" | "e")
@@ -383,7 +383,25 @@ case $1 in
 		stty echo
 
 		$EDITOR ii/$2.ii
-	;;
+		;;
+
+	# switching to another branch/revision?
+	"switch" | "s")
+		exist_check $2
+		write_check
+
+		cd $2
+
+		if [[ ! -z $3 ]]; then
+			if [[ -d ".git/" ]]; then
+				git switch $3
+			else
+				svn switch $3
+			fi
+		else
+			error "branch not provided!"
+		fi
+		;;
 
 	# delete an entry from the list?
 	"delete" | "d")
@@ -404,7 +422,7 @@ case $1 in
 			rm -rf $2
 			[[ $? = 0 ]] && echo "Done"
 		fi
-	;;
+		;;
 
 	# requested the message of last git commit?
 	"message" | "m")
@@ -447,7 +465,7 @@ case $1 in
 			fi
 			[[ $# > 2 ]] && cd - > /dev/null
 		done
-	;;
+		;;
 
 	# requested the commit history?
 	"history" | "H")
@@ -472,7 +490,7 @@ case $1 in
 		else
 			svn log -l$DEPTH -v | head -n-1 | tail -n+2
 		fi
-	;;
+		;;
 
 	# requested the version?
 	"version" | "v")
@@ -481,36 +499,37 @@ case $1 in
 		tput sgr0
 		echo "written by ruby (https://github.com/ruby-R53),"
 		echo "on August 2025."
-	;;
+		;;
 
 	# didn't even input a valid action or wants to know
 	# them?
 	"help" | "h" | *)
 		msg "Usage" "$0 <action>"
 		msg "Actions (and their short forms)" ""
-		echo "(h)elp               - shows this help message"
-		echo "(u)pdate [pkg]       - update every package listed in pkg.list, you"
-		echo "                       can also choose to update [pkg] alone"
-		echo "(i)nstall <pkg>      - install <pkg> using \$FPKG_ROOT/ii/<pkg>.ii"
-		echo "(r)emove <pkg>       - uninstall <pkg> using \$FPKG_ROOT/ii/<pkg>.ii also"
-		echo "(l)ist               - list registered packages"
-		echo "(a)dd <pkg>          - register <pkg>"
-		echo "(p)eek <pkg>         - peek into <pkg>'s .ii"
-		echo "(g)oto <pkg>         - start a shell at <pkg>'s directory"
-		echo "(e)dit <pkg>         - edit <pkg>'s ii"
-		echo "(d)elete <pkg>       - remove <pkg> from pkg.list, you may also delete"
-		echo "                       its files as well"
-		echo "(m)essage [-d] <pkg> - get comment from last commit of <pkg>. Takes an"
-		echo "                       optional -d switch to get its diff, and you may"
-		echo "                       specify multiple packages as well"
-		echo "(H)istory [n] <pkg>  - get <pkg>'s commit history. Takes an optional"
-		echo "                       number [n] to get a custom depth. Defaults to 5"
-		echo "(v)ersion            - get fpkg's version"
+		echo "(u)pdate [pkg]         - update every package listed in pkg.list, you"
+		echo "                         can also choose to update [pkg] alone"
+		echo "(i)nstall <pkg>        - install <pkg> using \$FPKG_ROOT/ii/<pkg>.ii"
+		echo "(r)emove <pkg>         - uninstall <pkg> using \$FPKG_ROOT/ii/<pkg>.ii also"
+		echo "(l)ist                 - list registered packages"
+		echo "(a)dd <pkg>            - register <pkg>"
+		echo "(p)eek <pkg>           - peek into <pkg>'s .ii"
+		echo "(g)oto <pkg>           - start a shell at <pkg>'s directory"
+		echo "(e)dit <pkg>           - edit <pkg>'s ii"
+		echo "(d)elete <pkg>         - remove <pkg> from pkg.list, you may also delete"
+		echo "                         its files as well"
+		echo "(m)essage [-d] <pkg>   - get comment from last commit of <pkg>. Takes an"
+		echo "                         optional -d switch to get its diff, and you may"
+		echo "                         specify multiple packages as well"
+		echo "(H)istory [n] <pkg>    - get <pkg>'s commit history. Takes an optional"
+		echo "                         number [n] to get a custom depth. Defaults to 5"
+		echo "(s)witch <pkg> <brnch> - switch <pkg>'s branch to <brnch>"
+		echo "(h)elp                 - shows this help message"
+		echo "(v)ersion              - get fpkg's version"
 
 		# exit with error code if input wasn't
 		# for the help text
 		[[ $1 != "help" ]] && [[ $1 != "h" ]] && quit 1
-	;;
+		;;
 esac
 
 # and the program is done!
