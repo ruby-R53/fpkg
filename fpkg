@@ -451,13 +451,9 @@ case $1 in
 
 	# requested the commit history?
 	"history" | "H")
-		# regular expression to check if argument
-		# is a number
-		NUMBER_CHECK="^[0-9]+$"
-
 		# check if argument is a number,
 		# and define our depth to that
-		if [[ $2 =~ $NUMBER_CHECK ]]; then
+		if [[ $2 =~ ^[0-9]+$ ]]; then
 			DEPTH=$2
 			shift
 		else
