@@ -455,18 +455,17 @@ case $1 in
 		# is a number
 		NUMBER_CHECK="^[0-9]+$"
 
-		# shift if it is
-		[[ $2 =~ $NUMBER_CHECK ]] && shift
+		# check if argument is a number,
+		# and define our depth to that
+		if [[ $2 =~ $NUMBER_CHECK ]]; then
+			DEPTH=$2
+			shift
+		else
+			DEPTH=5
+		fi
 
 		exist_check $2
 		cd $2
-
-		# and change the depth to that
-		if [[ $1 =~ $NUMBER_CHECK ]]; then
-			DEPTH=$1
-		else # or not
-			DEPTH=5
-		fi
 
 		if [[ -r ".git/" ]]; then
 			PRETTY=("%C(white default bold)(%cd)"
