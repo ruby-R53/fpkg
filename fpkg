@@ -245,8 +245,10 @@ case $1 in
 				sed -i "$ENTRY"d pkg.list # and delete the package from it
 				rm ii/$2.ii
 				rm -rf $2
-				[[ $? = 0 ]] && echo "Done!"
+				[[ $? != 0 ]] && error "failed to delete $2!"
 			fi
+
+			echo "Done!"
 		fi
 		;;
 
@@ -344,6 +346,7 @@ case $1 in
 
 		# finally, make it executable so that fpkg can run it
 		chmod +x ii/$2.ii
+
 		# and we're done
 		echo "Done."
 		;;
@@ -418,10 +421,11 @@ case $1 in
 		echo -n "as well? [y/N] "
 		read CHOICE
 
-		if [[ $CHOICE = 'y' ]]; then # same thing but defaulting to "no"
-			rm -rf $2
-			[[ $? = 0 ]] && echo "Done"
+		if [[ $CHOICE = 'y' ]]; then
+			rm -vrf $2
 		fi
+
+		echo "Done!"
 		;;
 
 	# requested the message of last git commit?
@@ -445,6 +449,7 @@ case $1 in
 					# check if we got a commit body to print as well
 					[[ ! -z $(git --no-pager log -1 --pretty="%b") ]] &&
 						PRETTY+=("%n%C(white default bold)Details:%C(reset) %b")
+
 					git --no-pager log -1 --pretty="${PRETTY[*]}"
 					# also print a blank line unless it's the last
 					# message on the list
