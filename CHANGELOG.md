@@ -1,3 +1,18 @@
+**August 26, 2025:**
+- You can now exclude packages from being updated with
+  `fpkg u -x`
+  - Inspired by emerge's `--exclude=` switch. I sometimes have
+    to use it, so why not implement it here as well?
+- You can now specify more than one package to still be updated
+  alone with `fpkg u <pkg1> <pkg2>`
+  - This comes in handy in case you only wanna update one
+    package and its dependencies.
+- Bundle with a Bash completion?
+  - This would also come in handy, being able to have it
+    autocomplete your package names would be nice. Still unsure
+    about that tho', as I've never written a shell completion
+    thing.
+
 **August 25, 2025:**
 - `switch` implemented for switching branches!
   - Why didn't I think of this before? I dunno. Maybe because

@@ -148,9 +148,19 @@ case $1 in
 	# source VCS' tool
 	"update" | "u")
 		# no extra arguments? then all packages will be checked
-		if [[ -z $2 ]]; then
+		if [[ -z $2 ]] || [[ $2 = "-x" ]]; then
 			# get what packages we have
 			ENTRIES=("$(awk -F" " '{ print $1 }' pkg.list | tr '\n' ' ')")
+
+			# check if we've got packages to exclude from
+			# our upgrade session
+			if [[ $2 = "-x" ]]; then
+				for EXCLUDE in ${@:3}; do
+					exist_check $EXCLUDE
+					ENTRIES=("$(echo ${ENTRIES[@]} | sed "s/$EXCLUDE//")")
+				done
+			fi
+
 			for PKG in ${ENTRIES[@]}; do
 				cd $PKG > /dev/null
 					
@@ -165,15 +175,20 @@ case $1 in
 			done
 		# or update just that particular package
 		else
-			exist_check $2 # check if it exists first
-			cd $2		   # change to its directory if so
+			for ITEM in ${@:2}; do
+				exist_check $ITEM
+				cd $ITEM
 
-			# weird way of checking if a package needs rebase or not
-			[[ -d ".git/" ]] &&
-				export \
-				$(grep "$2 REBASE" $FPKG_ROOT/pkg.list | awk -F" " '{ print $2 }')
-			# and perform the update
-			update
+				# weird way of checking if a package needs rebase or not
+				[[ -d ".git/" ]] &&
+					export \
+					$(grep "$ITEM REBASE" $FPKG_ROOT/pkg.list | awk -F" " '{ print $2 }')
+				# check if we've got more than a single
+				# package to update
+				[[ $# > 2 ]] && msg "$ITEM" ""
+				# and perform it
+				update
+			done
 		fi
 		;;
 
@@ -511,8 +526,9 @@ case $1 in
 	"help" | "h" | *)
 		msg "Usage" "$0 <action>"
 		msg "Actions (and their short forms)" ""
-		echo "(u)pdate [pkg]         - update every package listed in pkg.list, you"
-		echo "                         can also choose to update [pkg] alone"
+		echo "(u)pdate [-x] [pkg(s)] - update every package listed in pkg.list, you"
+		echo "                         may also choose to update one or some of"
+		echo "                         them, or e[x]clude from the list"
 		echo "(i)nstall <pkg>        - install <pkg> using \$FPKG_ROOT/ii/<pkg>.ii"
 		echo "(r)emove <pkg>         - uninstall <pkg> using \$FPKG_ROOT/ii/<pkg>.ii also"
 		echo "(l)ist                 - list registered packages"
