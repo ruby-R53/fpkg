@@ -135,8 +135,8 @@ fi
 # also check if ii/ exists too,
 # in case only the former already existed
 if [[ ! -d $FPKG_ROOT/ii ]]; then
-	msg "WARNING" "$FPKG_ROOT/ii does not exist! \
-		\nCreating it now..."
+	msg "ERROR" "$FPKG_ROOT/ii does not exist! \
+		\nCreating it and aborting now..."
 	mkdir -pv $FPKG_ROOT/ii
 
 	quit 1

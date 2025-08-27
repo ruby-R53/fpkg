@@ -16,7 +16,7 @@ directory `ii/` present on the directory it'll work on.
 `pkg.list` contains a newline-separated list of all packages, and you currently
 have to register them manually. You can easily do this by running `fpkg add`.
 
-The list contains the packages to check for update and also a key to check if
+The list contains the packages to check for updates and also a key to check if
 that individual package needs to be updated with `--rebase` (in case it comes
 from a git source) or not. A kinda crap way of implementing it, but hey, it
 works! I might try improving it in the future.
@@ -52,11 +52,11 @@ will be used in fpkg's shell.
 
 3. And for the text editor, it's also as simple. Change `$EDITOR` to your preferred one.
 
-4. Then, run `fpkg add` to register and write the .ii's for all the packages you have on your $FPKGDIR.
+4. Then, run `fpkg add` to register and write the .ii's for all the packages you have on your `$FPKGDIR`.
 
 5. Then, you can run `fpkg update` just to check if everything is working and if your stuff is up to date of course.
 
-6. That's it, you're good to go! And don't forget to run `fpkg help` to know some extra features too!
+6. That's it, you're good to go! And don't forget to run `fpkg help` to see some extra features too!
 
 ### Logging
 
@@ -64,9 +64,9 @@ This is used to track down the build process of a package, so that if something 
 
 On `fpkg`, logging works as follows:
 
-- Two variables, `$FPKG_LOG` and `$LOG_FMT` are commented out. They respectively correspond to the location of the log file and the format of the timestamp on
+- Two variables, `$FPKG_LOG` and `$LOG_FMT`, are commented out. They respectively correspond to the location of the log file and the format of the timestamp on
 the log file.
-- Those variables are commented out by default, disabling the logging feature. To enable it, just uncomment them.
+- Those variables are commented out by default, disabling the logging feature. To enable it, just uncomment them and make sure they're set (duh).
 
 I'm not sure if I should keep it this way, it was the best I could think of.
 
