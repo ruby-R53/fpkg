@@ -1,3 +1,10 @@
+**September 1st, 2025:**
+- fpkg now doesn't abort when it fails to update one of the
+  packages on a full-update session
+  - The warning part of `msg()` ain't useless now :) I think
+    this makes more sense as it's more convenient than aborting
+    just because of one failed part.
+
 **August 26, 2025:**
 - You can now exclude packages from being updated with
   `fpkg u -x`

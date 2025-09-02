@@ -164,10 +164,12 @@ case $1 in
 			for PKG in ${ENTRIES[@]}; do
 				cd $PKG > /dev/null
 					
+				# couldn't change to that package's directory?
 				if [[ $? != 0 ]]; then
-					error "$PKG does not exist! \
-						   \nRemove its entry with \`fpkg delete' and retry. \
-						   \nAborting..."
+					msg "WARNING" \
+						"$PKG does not exist! \
+						\nRemove its entry with \`fpkg delete' and retry."
+					continue
 				fi
 
 				msg "$PKG" ""
@@ -182,7 +184,8 @@ case $1 in
 				# weird way of checking if a package needs rebase or not
 				[[ -d ".git/" ]] &&
 					export \
-					$(grep "$ITEM REBASE" $FPKG_ROOT/pkg.list | awk -F" " '{ print $2 }')
+						$(grep "$ITEM REBASE" $FPKG_ROOT/pkg.list | \
+							awk -F" " '{ print $2 }')
 				# check if we've got more than a single
 				# package to update
 				[[ $# > 2 ]] && msg "$ITEM" ""
