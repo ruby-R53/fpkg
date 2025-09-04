@@ -4,6 +4,13 @@
 FPKG_ROOT="/usr/local/fpkg"
 # change this to your preferred editor
 EDITOR="vim"
+# default options for our pager, less
+# used for only reading files, like
+# when running the `peek' action
+# defaults to quit if file fits on the
+# current screen, and the tab width is
+# set to 4 characters
+LESS="-F -x4"
 
 # logging stuff, leave them commented out
 # to keep disabled
@@ -373,7 +380,7 @@ case $1 in
 	"peek" | "p")
 		exist_check $2
 
-		less -F ii/$2.ii
+		less ii/$2.ii
 		;;
 
 	# going to the package's directory?
@@ -478,7 +485,7 @@ case $1 in
 				# add a pager to the diff output like
 				# in git's as well
 				if [[ $1 = "-d" ]]; then
-					svn log -l1 -v --diff | less -F
+					svn log -l1 -v --diff | less
 				else
 					# remove those hyphens at the top and
 					# bottom of the output to make it

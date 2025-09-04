@@ -52,6 +52,10 @@ will be used in fpkg's shell.
 
 3. And for the text editor, it's also as simple. Change `$EDITOR` to your preferred one.
 
+- **Optional:** set `$LESS` to your preferred options for less. By default,
+  less quits if the file fits the entire screen, and its tab width is set to be
+  4 characters long.
+
 4. Then, run `fpkg add` to register and write the .ii's for all the packages you have on your `$FPKGDIR`.
 
 5. Then, you can run `fpkg update` just to check if everything is working and if your stuff is up to date of course.

@@ -1,3 +1,15 @@
+**September 4th, 2025:**
+- You can now change less' behavior globally.
+  - The default is to now quit if the whole file fits on the
+    screen and the default tab width is set to 4 characters.
+    This is done by changing `$LESS`, an environment variable
+    less automatically detects to load user options. One more
+    environment variable to our script setup now.
+  - Should the pager actually be customizable too? I mean, most
+    users would use less, but what about ones who would use
+    something else for whatever reason?
+    Meh, I'll just keep less for now.
+
 **September 1st, 2025:**
 - fpkg now doesn't abort when it fails to update one of the
   packages on a full-update session
