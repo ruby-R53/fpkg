@@ -8,9 +8,9 @@ EDITOR="vim"
 # used for only reading files, like
 # when running the `peek' action
 # defaults to quit if file fits on the
-# current screen, and the tab width is
-# set to 4 characters
-LESS="-F -x4"
+# current screen, 4-character long tab,
+# and print ANSI escape codes
+LESS="-F -R -x4"
 
 # logging stuff, leave them commented out
 # to keep disabled
