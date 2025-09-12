@@ -154,7 +154,7 @@ case $1 in
 		# no extra arguments? then all packages will be checked
 		if [[ -z $2 ]] || [[ $2 = "-x" ]]; then
 			# get what packages we have
-			ENTRIES=("$(awk -F" " '{ print $1 }' pkg.list | tr '\n' ' ')")
+			ENTRIES=("$(awk '{ print $1 }' pkg.list | tr '\n' ' ')")
 
 			# check if we've got packages to exclude from
 			# our upgrade session
@@ -189,7 +189,7 @@ case $1 in
 				[[ -d ".git/" ]] &&
 					export \
 						$(grep "$ITEM REBASE" $FPKG_ROOT/pkg.list | \
-							awk -F" " '{ print $2 }')
+							awk '{ print $2 }')
 				# check if we've got more than a single
 				# package to update
 				[[ $# > 2 ]] && msg "$ITEM" ""
@@ -220,6 +220,10 @@ case $1 in
 			# if it does, unhide keystrokes here 
 			[[ $INTERACTIVE = "YES" ]] && stty echo
 
+			# get the installation instructions from
+			# the package's ii
+			source $FPKG_ROOT/ii/$ITEM.ii
+
 			if [[ $FPKG_LOG && $LOG_FMT ]]; then
 				# check if the log dir exists first
 				# and create it accordingly as it's 
@@ -229,12 +233,12 @@ case $1 in
 				# $LOG_FMT gets expanded here for creating the file
 				LOGFILE=$FPKG_LOG/$(printf "$ITEM-%($LOG_FMT)T")
 
-				$FPKG_ROOT/ii/$ITEM.ii install | tee -a $LOGFILE
+				install | tee -a $LOGFILE
 
 				# warn the user about it
 				echo -e \\n"Build log saved to $LOGFILE."
 			else
-				$FPKG_ROOT/ii/$ITEM.ii install
+				install
 			fi
 		done
 
@@ -250,7 +254,8 @@ case $1 in
 
 		cd $2
 
-		$FPKG_ROOT/ii/$2.ii remove
+		# ditto, but for uninstalling it
+		source $FPKG_ROOT/ii/$2.ii; remove
 
 		# ask if the user wants to completely remove it
 		# from their system as well
@@ -275,7 +280,7 @@ case $1 in
 
 	# requested the list of registered packages?
 	"list" | "l")
-		awk -F" " '{ print $1 }' pkg.list
+		awk '{ print $1 }' pkg.list
 
 		# tell user how many packages in total
 		# they have too
@@ -354,12 +359,6 @@ case $1 in
 		echo -e "install() {"\\n\\n"}"\\n >> ii/$2.ii
 		echo -e "remove() {"\\n\\n"}"\\n  >> ii/$2.ii
 
-		# this is necessary for being able to call one of the
-		# functions when needed
-		echo "# DO NOT REMOVE! This is used for calling the" >> ii/$2.ii
-		echo "# functions from this ii..."                   >> ii/$2.ii
-		echo "call=\$1; \$call"                              >> ii/$2.ii
-
 		# open up the text editor so that the user can write on
 		# that template
 		$EDITOR ii/$2.ii
@@ -434,7 +433,7 @@ case $1 in
 		stty echo
 
 		# get index number of package
-		ENTRY=$(grep -wn "^$2" pkg.list | awk -F: '{ print $1 }')
+		ENTRY=$(grep -wn "^$2" pkg.list | awk -F":" '{ print $1 }')
 		sed -i "$ENTRY"d pkg.list # and delete the package from it
 		rm ii/$2.ii
 		echo "$2 removed from pkg.list, would you like to remove its files"
