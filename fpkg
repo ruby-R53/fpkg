@@ -286,12 +286,12 @@ case $1 in
 	# adding an entry to the list?
 	"add" | "a")
 		# check if we even have the package's name first
-		[[ -z $2 ]] && error "package name was not provided!"
+		[[ -z $2 ]] && error "package name not provided!"
 
 		# then, check if we have the directory for the
 		# requested package
 		[[ ! -d $FPKG_ROOT/$2 ]] &&
-			error "directory not found for package! \
+			error "directory for package not found! \
 			\nWas it a typo?"
 
 		# check if version control type is supported by
