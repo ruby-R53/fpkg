@@ -9,7 +9,7 @@ EDITOR="vim"
 # when running the `peek' action
 # defaults to quit if file fits on the
 # current screen, 4-character long tab,
-# and print ANSI escape codes
+# and process ANSI escape codes
 LESS="-F -R -x4"
 
 # logging stuff, leave them commented out
@@ -55,11 +55,10 @@ error() {
 
 # to check if a package exists
 exist_check() {
-	[[ -z $1 ]] && error "package name was not provided!"
+	[[ -z $1 ]] && error "package name not provided!"
 
 	# checking return type to see if the package exists
-	grep -w $1 $FPKG_ROOT/pkg.list > /dev/null
-	[[ $? > 0 ]] &&
+	grep -w $1 $FPKG_ROOT/pkg.list > /dev/null ||
 		error "$1 not found in pkg.list! \
 		\nWas it a typo?"
 }
@@ -102,11 +101,9 @@ update() {
 
 # check if user has at least one of
 # the following VCSes: git
-which git > /dev/null 2>&1
-[[ $? = 0 ]] && HAS_GIT=true
+which git > /dev/null 2>&1 && HAS_GIT=true
 # and svn
-which svn > /dev/null 2>&1
-[[ $? = 0 ]] && HAS_SVN=true
+which svn > /dev/null 2>&1 && HAS_SVN=true
 
 [[ ! $HAS_GIT ]] && [[ ! $HAS_SVN ]] &&
 	error "no compatible VCSes found! \
@@ -170,9 +167,9 @@ case $1 in
 
 			for PKG in ${ENTRIES[@]}; do
 				cd $PKG > /dev/null
-					
-				# couldn't change to that package's directory?
+
 				if [[ $? != 0 ]]; then
+					# couldn't change to that package's directory?
 					msg "WARNING" \
 						"$PKG does not exist! \
 						\nRemove its entry with \`fpkg delete' and retry."
@@ -269,8 +266,7 @@ case $1 in
 				ENTRY=$(grep -wn "^$2" pkg.list | awk -F":" '{ print $1 }')
 				sed -i "$ENTRY"d pkg.list # and delete the package from it
 				rm ii/$2.ii
-				rm -rf $2
-				[[ $? != 0 ]] && error "failed to delete $2!"
+				rm -rf $2 || error "failed to delete $2!"
 			fi
 
 			echo "Done!"
@@ -305,8 +301,7 @@ case $1 in
 			error "incompatible VCS or none found! \
 			\nSupported ones are: git, svn."
 
-		grep -w $2 pkg.list > /dev/null
-		[[ $? = 0 ]] && error "$2 is already registered!"
+		grep -w $2 pkg.list > /dev/null && error "$2 already registered!"
 
 		write_check
 
@@ -388,7 +383,7 @@ case $1 in
 		exist_check $2
 
 		# see if we even have the .bashrc to begin with
-		[[ ! -r $FPKG_ROOT/.bashrc ]] &&
+		[[ -r $FPKG_ROOT/.bashrc ]] ||
 			error "no existing or readable .bashrc on \$FPKG_ROOT!"
 
 		stty echo
@@ -446,9 +441,7 @@ case $1 in
 		echo -n "as well? [y/N] "
 		read CHOICE
 
-		if [[ $CHOICE = 'y' ]]; then
-			rm -vrf $2
-		fi
+		[[ $CHOICE = 'y' ]] && rm -vrf $2
 
 		echo "Done!"
 		;;
@@ -478,8 +471,7 @@ case $1 in
 					git --no-pager log -1 --pretty="${PRETTY[*]}"
 					# also print a blank line unless it's the last
 					# message on the list
-					[[ $# > 2 ]] &&
-						[[ $ITEM != ${@:$#} ]] && echo
+					[[ $# > 2 ]] && [[ $ITEM != ${@:$#} ]] && echo
 				fi
 			else
 				# add a pager to the diff output like
