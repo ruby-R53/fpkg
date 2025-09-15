@@ -1,3 +1,21 @@
+**September 15th, 2025:**
+- That `call=$1; $call` line at the end of every `.ii` is no
+  longer required.
+  - Finally. I realized `source` exists, and I can use it to
+    do the operations instead of that hacky way.
+  - Now the code is cleaner, and I'd recommend to remove that
+    line altogether.
+  - This also means ii's don't require to be executable, so now
+    the file mode provided by fpkg on every ii created is
+    `-rw-r--r--`. This makes them a little safer, and now such
+    files can't be run without fpkg's context.
+  - However, it's now required to add another line of code at
+    the very beginning of the file, if that first `if` block
+    of it is uncommented. It's `stty echo`.
+    - Because the thing makes the script exit before it can do
+      anything, without this, keystrokes remain hidden. So
+      add this to your ii's.
+
 **September 4th, 2025:**
 - You can now change less' behavior globally.
   - The default is to now quit if the whole file fits on the

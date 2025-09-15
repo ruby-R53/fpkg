@@ -348,6 +348,7 @@ case $1 in
 		echo    "# for installing this package"                      >> ii/$2.ii
 		echo    "#if [[ \$(id -u) != 0 ]]; then"					 >> ii/$2.ii
 		echo -e "#\\techo \"This action requires root privileges!\"" >> ii/$2.ii
+		echo -e "#\\tstty echo" >> ii/$2.ii
 		echo -e "#\\texit 1"                                         >> ii/$2.ii
 		echo -e "#fi"\\n                                             >> ii/$2.ii
 
@@ -363,8 +364,8 @@ case $1 in
 		# that template
 		$EDITOR ii/$2.ii
 
-		# finally, make it executable so that fpkg can run it
-		chmod +x ii/$2.ii
+		# make it safer and only let the owner write to it
+		chmod 0644 ii/$2.ii
 
 		# and we're done
 		echo "Done."
