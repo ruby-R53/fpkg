@@ -234,9 +234,6 @@ case $1 in
 				LOGFILE=$FPKG_LOG/$(printf "$ITEM-%($LOG_FMT)T")
 
 				install | tee -a $LOGFILE
-
-				# warn the user about it
-				echo -e \\n"Build log saved to $LOGFILE."
 			else
 				install
 			fi
@@ -245,6 +242,11 @@ case $1 in
 		# and then, ring the terminal bell when done, and that
 		# if the operation has succeeded
 		[[ $? = 0 ]] && tput bel
+
+		# then, tell the user about the log file
+		# location
+		[[ $FPKG_LOG && $LOG_FMT ]] &&
+			echo -e \\n"Build log(s) saved to $LOGFILE."
 		;;
 
 	# requested the uninstallation of a package?
