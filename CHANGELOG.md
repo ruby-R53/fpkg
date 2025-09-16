@@ -1,3 +1,14 @@
+**September 16th, 2025:**
+- `pkg.list` has been renamed to `pkg.lst`.
+  - Just to make the extension naming scheme more consistent.
+    Renaming that file shouldn't be a big issue anyway.
+- Implementing modules as a way to extend fpkg's functionality,
+  there was an attempt···
+  - Yeah, turns out I'm not really ready to implement that. I
+    guess it's better to leave things the way they were. It's
+    not like there'll be that much demand for expansioning it
+    anyway···
+
 **September 15th, 2025:**
 - That `call=$1; $call` line at the end of every `.ii` is no
   longer required.
