@@ -1,3 +1,17 @@
+**September 19th, 2025:**
+- fpkg now has a Bash completion script!
+  - I didn't mind typting the whole name of my packages at
+    first, but now I do as I'm starting to mess with them more
+    often.
+    Because there're already short versions of the commands,
+    the completion script only expands to the user's registered
+    packages.
+  - Yeah, am I the only one who finds it satisfying to hit tab
+    to autocomplete nearly everything I type? It's funny 'cos I
+    used to avoid it at all costs, just because I wanted to
+    improve my typing. Little did I know this wouldn't make
+    that much of a difference anyway 🥀
+
 **September 16th, 2025:**
 - `pkg.list` has been renamed to `pkg.lst`.
   - Just to make the extension naming scheme more consistent.

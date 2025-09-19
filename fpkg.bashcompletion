@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+FPKG_ROOT="/usr/local/fpkg"
+
+PKGLIST="$(awk '{ print $1 }' ${FPKG_ROOT}/pkg.lst | tr '\n' ' ')"
+
+complete -W "${PKGLIST}" fpkg
