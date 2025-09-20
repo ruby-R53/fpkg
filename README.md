@@ -38,6 +38,7 @@ preinstalled):
 - coreutils (cat, echo, mkdir, stty)
 - grep
 - sed
+- make
 - at least one of: git and svn (duh)
 
 ### Setup
