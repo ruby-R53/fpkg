@@ -42,15 +42,14 @@ preinstalled):
 
 ### Setup
 
-1. Just put the script somewhere in your `$PATH`, I use `/usr/local/bin/` on mine for
-example.
+1. Put the script somewhere in your `$PATH`, I use `/usr/local/bin/` on mine for example.
+Then, move `fpkg.conf` to `/etc/`. This is where all the variables used by fpkg reside.
 
-2. As for the directory containing all packages, you just change `$FPKG_ROOT` to whatever
-directory you want, and if doesn't already exist, `fpkg` will make it for you!
+2. For the directory containing all packages, open `fpkg.conf` and change `$FPKG_ROOT` to
+whatever directory you want, and if doesn't already exist, `fpkg` will make it for you!
 
 - **Optional:** install the bundled completion script as well, for managing your packages
-  slightly faster. Make sure `$FPKG_ROOT` is the same in both `fpkg` and on the
-  completion script.
+  slightly faster.
 
 2.1. Be sure to add the bundled `.bashrc` to that work directory as well. It will be used
 in fpkg's shell.
@@ -62,7 +61,7 @@ in fpkg's shell.
   4 characters long.
 
 4. Then, run `fpkg add` to register and write the .ii's for all the packages you have on
-your `$FPKGDIR`.
+your `$FPKG_ROOT`.
 
 5. Then, you can run `fpkg update` just to check if everything is working and if your
 stuff is up to date of course.

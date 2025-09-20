@@ -25,6 +25,9 @@
   - Yeah, version 4 sure will be radically different compared
     to version 3. It's like a whole new program was made
     instead.
+- MORE #2: should I write a Makefile for installing this thing?
+  I mean, I've been trying to add so many files to it, and
+  manually installing them doesn't look very efficient.
 
 **September 16th, 2025:**
 - `pkg.list` has been renamed to `pkg.lst`.
