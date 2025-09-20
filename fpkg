@@ -1,23 +1,5 @@
 #!/bin/bash
 
-# where all packages are located at
-FPKG_ROOT="/usr/local/fpkg"
-# change this to your preferred editor
-EDITOR="vim"
-# default options for our pager, less
-# used for only reading files, like
-# when running the `peek' action
-# defaults to quit if file fits on the
-# current screen, 4-character long tab,
-# and process ANSI escape codes
-LESS="-F -R -x4"
-
-# logging stuff, leave them commented out
-# to keep disabled
-#FPKG_LOG="/tmp/fpkg_log" # log directory, /tmp seems to be a good choice
-#LOG_FMT="%Y%m%d-%H%M%S"  # the format used to timestamp the log files
-                          # see man page of `date' for more
-
 # to restore the terminal state and exit with a code
 quit() {
 	popd > /dev/null 2>&1 # restore user's working directory quietly
@@ -109,14 +91,19 @@ which svn > /dev/null 2>&1 && HAS_SVN=true
 	error "no compatible VCSes found! \
 	\nTry installing at least one of: git, svn."
 
+
+# get our configuration file containing all the
+# environment variables needed for this to work
+source /etc/fpkg.conf || exit 2
+
+# then, check if we even have a proper setup
 if [[ -z $FPKG_ROOT ]] || [[ -z $EDITOR ]]; then
-	# check if we even have a setup
 	msg "ERROR" "\$FPKG_ROOT and/or \$EDITOR unset! \
 		\nSet both of these variables and try again."
 
 	quit 2
 else
-	# environment setup
+	# then go set the environment up
 	stty -echo          # hide keystrokes, not sure how to discard them too
 	pushd . > /dev/null # save user's current directory
 	cd $FPKG_ROOT       # so that we can go to $FPKG_ROOT

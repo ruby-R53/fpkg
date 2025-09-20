@@ -11,6 +11,20 @@
     used to avoid it at all costs, just because I wanted to
     improve my typing. Little did I know this wouldn't make
     that much of a difference anyway 🥀
+- MORE: the variables seen in `fpkg` have now been moved to a
+  whole separate file, `/etc/fpkg.conf`
+  - Both the package manager itself and its completion script
+    use the same variable for the work directory, so this
+    reduces the redundancy on the code and removes the need to
+    check if both files have that variable set to the same
+    value.
+  - This also lets the script be more extensible in the future,
+    as too many variable definitions in one file would make it
+    cluttered, even though they're separated from the rest of
+    the program code.
+  - Yeah, version 4 sure will be radically different compared
+    to version 3. It's like a whole new program was made
+    instead.
 
 **September 16th, 2025:**
 - `pkg.list` has been renamed to `pkg.lst`.
