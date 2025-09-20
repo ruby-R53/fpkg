@@ -45,11 +45,12 @@ preinstalled):
 1. Just put the script somewhere in your `$PATH`, I use `/usr/local/bin/` on mine for
 example.
 
-- **Optional:** install the bundled completion script as well, for managing your
-  packages slightly faster.
-
 2. As for the directory containing all packages, you just change `$FPKG_ROOT` to whatever
 directory you want, and if doesn't already exist, `fpkg` will make it for you!
+
+- **Optional:** install the bundled completion script as well, for managing your packages
+  slightly faster. Make sure `$FPKG_ROOT` is the same in both `fpkg` and on the
+  completion script.
 
 2.1. Be sure to add the bundled `.bashrc` to that work directory as well. It will be used
 in fpkg's shell.
