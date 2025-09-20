@@ -1,3 +1,25 @@
+**September 20th, 2025:**
+- Create a Makefile to install the damn thing automatically
+  instead of asking the user to manually copy each file to each
+  directory
+  - Finally. I've actually been considering to implement this
+    for quite a while, but back when I first had that thought,
+    I figured the program was just too small for a Makefile to
+    be benefitial. Well, turns out we need one now.
+  - This also changes how files are spread out across the
+    user's file system:
+    - `fpkg` remains on `/usr/local/bin/`;
+    - `fpkg.conf` now goes on `/etc/fpkg/`. A new directory was
+      made to accomodate both the configuration file and the
+      resource file used by fpkg's shell.
+    - and `fpkg.bashcompletion` now lies on
+      `/usr/share/bash-completion/completions/`, following
+      other completion scripts, at least in my system because
+      that's how it organizes it. I'm not really sure if I
+      should keep this path hardcoded or if I should make a
+      variable for it instead. I gotta check how other distros
+      do it.
+
 **September 19th, 2025:**
 - fpkg now has a Bash completion script!
   - I didn't mind typting the whole name of my packages at

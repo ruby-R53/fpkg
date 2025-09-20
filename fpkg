@@ -371,9 +371,8 @@ case $1 in
 	"goto" | "g")
 		exist_check $2
 
-		# see if we even have the .bashrc to begin with
-		[[ -r $FPKG_ROOT/.bashrc ]] ||
-			error "no existing or readable .bashrc on \$FPKG_ROOT!"
+		[[ -r "/etc/fpkg/bashrc" ]] ||
+			error "no existing or readable bashrc file found in /etc/fpkg/!"
 
 		stty echo
 
@@ -384,7 +383,7 @@ case $1 in
 		# and tell the user about it
 		sh -c 'cd $FPKG_ROOT/$PKG_DIR;
 		       echo "Working on $PKG_DIR/, hit ^D to exit";
-		       exec bash --rcfile $FPKG_ROOT/.bashrc' # and here it goes
+		       exec bash --rcfile /etc/fpkg/bashrc' # and here it goes
 		;;
 
 	# editing a package's .ii?

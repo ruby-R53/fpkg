@@ -42,32 +42,34 @@ preinstalled):
 
 ### Setup
 
-1. Put the script somewhere in your `$PATH`, I use `/usr/local/bin/` on mine for example.
-Then, move `fpkg.conf` to `/etc/`. This is where all the variables used by fpkg reside.
+1. Simply install the program by running `make`. By default, this will install the script
+itself to `/usr/local/bin/`, along with the configuration file `fpkg.conf` and the bundled
+`bashrc` file to `/etc/fpkg/`. The completion script, `fpkg.bashcomplete`, is then
+installed to `/usr/share/bash-completion/completions/`.
 
-2. For the directory containing all packages, open `fpkg.conf` and change `$FPKG_ROOT` to
-whatever directory you want, and if doesn't already exist, `fpkg` will make it for you!
+You may then change `$PREFIX` to whatever directory you'd like the script to be installed
+on.
 
-- **Optional:** install the bundled completion script as well, for managing your packages
-  slightly faster.
+2. Edit the configuration file `/etc/fpkg.conf` according to your setup. It currently has
+the following parameters:
+- `FPKG_ROOT`: the core, the directory where all your foreign packages are located, for
+  fpkg to handle them.
+- `EDITOR`: set this to your preferred text editor. This is used to add and edit your
+  .ii's.
+- `LESS`: this is used by the pager program, `less`, to set how it behaves. By default,
+  you get:
+  - quit if the file fits in a single screen (`-F`);
+  - process ANSI escape codes for colorized output (`-R`);
+  - and tab width set to 4 characters (`-x4`).
 
-2.1. Be sure to add the bundled `.bashrc` to that work directory as well. It will be used
-in fpkg's shell.
+3. Then, run `fpkg add` to register and write the .ii's for all the packages you have on
+`$FPKG_ROOT`.
 
-3. And for the text editor, it's also as simple. Change `$EDITOR` to your preferred one.
-
-- **Optional:** set `$LESS` to your preferred options for less. By default,
-  less quits if the file fits the entire screen, and its tab width is set to be
-  4 characters long.
-
-4. Then, run `fpkg add` to register and write the .ii's for all the packages you have on
-your `$FPKG_ROOT`.
-
-5. Then, you can run `fpkg update` just to check if everything is working and if your
+4. Then, you may run `fpkg update` just to check if everything is working and if your
 stuff is up to date of course.
 
-6. That's it, you're good to go! And don't forget to run `fpkg help` to see some extra
-features too!
+5. And that's it, you're set! Don't forget to run `fpkg help` to see some extra features
+as well!
 
 ### Logging
 
