@@ -1,3 +1,16 @@
+**September 27th, 2025:**
+- FUCK! I just realized fpkg only did the rebase check if the
+  package was being updated separately.
+  - How did I realize this only _now_? I have no idea. Shit was
+    so damn obvious 🥀
+- New update option for git packages: `SHALLOW=[YES|NO]`
+  - This just adds `--depth 1` to the pulling options. It's so
+    that the update is done much faster on larger repositories,
+    like the Linux kernel. Yes, that was the reason why I
+    implemented that.
+  - This is kinda bloating `pkg.lst` tho'. Maybe I should change
+    that approach for update options one day.
+
 **September 20th, 2025:**
 - Create a Makefile to install the damn thing automatically
   instead of asking the user to manually copy each file to each
