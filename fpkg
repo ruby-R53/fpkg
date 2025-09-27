@@ -80,6 +80,9 @@ update() {
 		[[ $SHALLOW = "YES" ]] && PULL_WITH+=(--depth 1)
 
 		git pull ${PULL_WITH[@]}
+
+		# so that the options don't get mixed
+		# across updating different packages
 		unset PULL_WITH
 	else
 		# don't print that "Updating"
@@ -100,7 +103,6 @@ which svn > /dev/null 2>&1 && HAS_SVN=true
 [[ ! $HAS_GIT ]] && [[ ! $HAS_SVN ]] &&
 	error "no compatible VCSes found! \
 	\nTry installing at least one of: git, svn."
-
 
 # get our configuration file containing all the
 # environment variables needed for this to work
