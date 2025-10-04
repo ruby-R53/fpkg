@@ -40,9 +40,9 @@ exist_check() {
 	[[ -z $1 ]] && error "package name not provided!"
 
 	# checking return type to see if the package exists
-	grep -w $1 $FPKG_ROOT/pkg.lst > /dev/null ||
+	grep -E "^$1( )" $FPKG_ROOT/pkg.lst > /dev/null ||
 		error "$1 not found in pkg.lst! \
-		\nWas it a typo?"
+			\nWas it a typo?"
 }
 
 # to check if elevated privileges are needed
