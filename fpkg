@@ -112,7 +112,7 @@ which svn > /dev/null 2>&1 && HAS_SVN=true
 
 # get our configuration file containing all the
 # environment variables needed for this to work
-source /etc/fpkg.conf || exit 2
+source /etc/fpkg.conf || error "failed to get configuration file! Aborting..."
 
 # then, check if we even have a proper setup
 if [[ -z $FPKG_ROOT ]] || [[ -z $EDITOR ]]; then
