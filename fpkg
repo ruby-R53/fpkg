@@ -357,7 +357,7 @@ case $1 in
 			fi
 		else
 			echo "Subversion"
-			echo "$2" >> pkg.lst
+			echo "$2 " >> pkg.lst
 		fi
 
 		# write a template for it to make it easier for the user
