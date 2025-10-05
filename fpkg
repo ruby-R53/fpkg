@@ -70,24 +70,30 @@ get_idx() {
 # to perform an update
 update() {
 	# check what kind of VCS we have
-	if [[ -d ".git/" ]]; then
-		PULL_WITH=(--recurse-submodules=on-demand)
+	CURR_USRGRP="$(id -nu | tr '\n' ' '; id -ng)"
+	OWNER_USRGRP="$(stat -c "%U %G" .)"
+	if [[ $CURR_USRGRP == $OWNER_USRGRP ]]; then
+		if [[ -d ".git/" ]]; then
+			PULL_WITH=(--recurse-submodules=on-demand)
 
-		# check if rebase is required
-		[[ $REBASE = "YES" ]] && PULL_WITH+=(--rebase)
+			# check if rebase is required
+			[[ $REBASE = "YES" ]] && PULL_WITH+=(--rebase)
 
-		# ditto for shallow updates
-		[[ $SHALLOW = "YES" ]] && PULL_WITH+=(--depth 1)
+			# ditto for shallow updates
+			[[ $SHALLOW = "YES" ]] && PULL_WITH+=(--depth 1)
 
-		git pull ${PULL_WITH[@]}
+			git pull ${PULL_WITH[@]}
 
-		# so that the options don't get mixed
-		# across updating different packages
-		unset PULL_WITH
+			# so that the options don't get mixed
+			# across updating different packages
+			unset PULL_WITH
+		else
+			# don't print that "Updating"
+			# line, make it a lil' cleaner
+			svn update | tail -n+2
+		fi
 	else
-		# don't print that "Updating"
-		# line, make it a lil' cleaner
-		svn update | tail -n+2
+		error "you don't own this package's directory!"
 	fi
 
 	# and then go to the previous dir
@@ -165,7 +171,7 @@ case $1 in
 			fi
 
 			for PKG in ${ENTRIES[@]}; do
-				cd $PKG > /dev/null
+				cd $PKG 2> /dev/null
 
 				# weird way of checking if a package needs rebase or not
 				# or if a shallow update was requested for it
@@ -192,7 +198,7 @@ case $1 in
 		else
 			for PKG in ${@:2}; do
 				exist_check $PKG
-				cd $PKG
+				cd $PKG 2> /dev/null
 
 				# ditto
 				if [[ -d ".git/" ]]; then
