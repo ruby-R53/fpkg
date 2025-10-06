@@ -540,7 +540,7 @@ case $1 in
 		echo "fpkg v4.0.0a"
 		tput sgr0
 		echo "written by ruby (https://github.com/ruby-R53),"
-		echo "on August 2025."
+		echo "during August to October 2025."
 		;;
 
 	# didn't even input a valid action or wants to know
