@@ -1,3 +1,21 @@
+**October 5th, 2025:**
+- fpkg now checks for your user and groups before updating a
+  package.
+  - Previously updating one as a different user would make git
+    complain and ask you to add a configuration entry. It'd
+    also make SVN hang when trying to update the repository.
+  - I wonder how many more error handling there is to do
+    here now···
+- Fix wrong pattern match (twice).
+  - First if a package had a hyphen or any other non-space
+    separator in its name grep would count any word from it as
+    a match. This would make the program freak the fuck out.
+  - Then, grep wouldn't recognize SVN packages as the pattern
+    search for them required a space character at the end, and
+    that's not what SVN entries have (for now).
+    Solution: just add a dummy space character on `pkg.lst` for
+    SVN packages and call it a day xd
+
 **September 27th, 2025:**
 - FUCK! I just realized fpkg only did the rebase check if the
   package was being updated separately.

@@ -69,31 +69,38 @@ get_idx() {
 
 # to perform an update
 update() {
-	# check what kind of VCS we have
-	CURR_USRGRP="$(id -nu | tr '\n' ' '; id -ng)"
-	OWNER_USRGRP="$(stat -c "%U %G" .)"
-	if [[ $CURR_USRGRP == $OWNER_USRGRP ]]; then
-		if [[ -d ".git/" ]]; then
-			PULL_WITH=(--recurse-submodules=on-demand)
-
-			# check if rebase is required
-			[[ $REBASE = "YES" ]] && PULL_WITH+=(--rebase)
-
-			# ditto for shallow updates
-			[[ $SHALLOW = "YES" ]] && PULL_WITH+=(--depth 1)
-
-			git pull ${PULL_WITH[@]}
-
-			# so that the options don't get mixed
-			# across updating different packages
-			unset PULL_WITH
-		else
-			# don't print that "Updating"
-			# line, make it a lil' cleaner
-			svn update | tail -n+2
-		fi
+	CURR_USRGRP=($(id -nu | tr '\n' ' '; id -nG))
+	OWNER_USRGRP=($(stat -c "%U %G" .))
+	if [[ ${CURR_USRGRP[0]} == ${OWNER_USRGRP[0]} ]]; then
+		for GROUP in ${CURR_USRGRP[@]:1}; do
+			# keep trying until we get a match
+			[[ $GROUP == ${OWNER_USRGRP[1]} ]] && break
+		done
+		[[ $GROUP != ${OWNER_USRGRP[1]} ]] &&
+			error "your group doesn't own this package's directory!"
 	else
-		error "you don't own this package's directory!"
+		error "your user doesn't own this package's directory!"
+	fi
+
+	# check what kind of VCS we have
+	if [[ -d ".git/" ]]; then
+		PULL_WITH=(--recurse-submodules=on-demand)
+
+		# check if rebase is required
+		[[ $REBASE = "YES" ]] && PULL_WITH+=(--rebase)
+
+		# ditto for shallow updates
+		[[ $SHALLOW = "YES" ]] && PULL_WITH+=(--depth 1)
+
+		git pull ${PULL_WITH[@]}
+
+		# so that the options don't get mixed
+		# across updating different packages
+		unset PULL_WITH
+	else
+		# don't print that "Updating"
+		# line, make it a lil' cleaner
+		svn update | tail -n+2
 	fi
 
 	# and then go to the previous dir
