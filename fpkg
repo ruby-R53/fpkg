@@ -166,7 +166,7 @@ case $1 in
 		# no extra arguments? then all packages will be checked
 		if [[ -z $2 ]] || [[ $2 = "-x" ]]; then
 			# get what packages we have
-			ENTRIES=("$(awk '{ print $1 }' pkg.lst | tr '\n' ' ')")
+			ENTRIES=("$(cut -d' ' -f1 pkg.lst | tr '\n' ' ')")
 
 			# check if we've got packages to exclude from
 			# our upgrade session
@@ -299,7 +299,7 @@ case $1 in
 
 	# requested the list of registered packages?
 	"list" | "l")
-		awk '{ print $1 }' pkg.lst
+		cut -d' ' -f1 pkg.lst
 
 		# tell user how many packages in total
 		# they have too

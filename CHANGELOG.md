@@ -1,3 +1,10 @@
+**October 6th, 2025:**
+- fpkg no longer requires awk now.
+  - I just discovered `cut` exists, and it's so much better.
+    awk would be ideal for much more complex operations, not
+    what fpkg does.
+    So I just de-bloated fpkg a little now :)
+
 **October 5th, 2025:**
 - fpkg now checks for your user and groups before updating a
   package.

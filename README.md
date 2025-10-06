@@ -34,7 +34,6 @@ the script's program calls, nothing crazy.
 Besides that, you'll also need the following (which most distros should already ship
 preinstalled):
 
-- awk
 - coreutils (cat, echo, mkdir, stty)
 - grep
 - sed
