@@ -64,7 +64,7 @@ write_check() {
 # to get the index number of a package, used for
 # operations with sed (for now)
 get_idx() {
-	export INDEX=$(grep -wn "^$2" pkg.lst | awk -F":" '{ print $1 }')
+	export INDEX=$(grep -wno "^$1" pkg.lst | cut -d':' -f1)
 }
 
 # to perform an update
@@ -90,7 +90,7 @@ update() {
 		[[ $REBASE = "YES" ]] && PULL_WITH+=(--rebase)
 
 		# ditto for shallow updates
-		[[ $SHALLOW = "YES" ]] && PULL_WITH+=(--depth 1)
+		[[ $SHALLOW = "YES" ]] && PULL_WITH+=(--depth 1 --rebase)
 
 		git pull ${PULL_WITH[@]}
 
@@ -180,16 +180,6 @@ case $1 in
 			for PKG in ${ENTRIES[@]}; do
 				cd $PKG 2> /dev/null
 
-				# weird way of checking if a package needs rebase or not
-				# or if a shallow update was requested for it
-				if [[ -d ".git/" ]]; then
-					export \
-						$(grep "$PKG REBASE" $FPKG_ROOT/pkg.lst | awk '{ print $2 }')
-
-					export \
-						$(grep "$PKG.*SHALLOW" $FPKG_ROOT/pkg.lst | awk '{ print $3 }')
-				fi
-
 				if [[ $? != 0 ]]; then
 					# couldn't change to that package's directory?
 					msg "WARNING" \
@@ -197,6 +187,11 @@ case $1 in
 						\nRemove its entry with \`fpkg delete' and retry."
 					continue
 				fi
+
+				# weird way of checking if a package needs rebase or not
+				# or if a shallow update was requested for it
+				[[ -d ".git/" ]] &&
+					export $(grep "$PKG" $FPKG_ROOT/pkg.lst | cut -d' ' -f2-)
 
 				msg "$PKG" ""
 				update
@@ -208,13 +203,8 @@ case $1 in
 				cd $PKG 2> /dev/null
 
 				# ditto
-				if [[ -d ".git/" ]]; then
-					export \
-						$(grep "$PKG REBASE" $FPKG_ROOT/pkg.lst | awk '{ print $2 }')
-
-					export \
-						$(grep "$PKG.*SHALLOW" $FPKG_ROOT/pkg.lst | awk '{ print $3 }')
-				fi
+				[[ -d ".git/" ]] &&
+					export $(grep "$PKG" $FPKG_ROOT/pkg.lst | cut -d' ' -f2-)
 
 				# check if we've got more than a single
 				# package to update so that we can print
@@ -352,22 +342,14 @@ case $1 in
 			echo -n "\`git pull --rebase'? [y/N] "
 			read CHOICE
 
-			if [[ $CHOICE = 'y' ]]; then
-				echo "$2 REBASE=YES" >> pkg.lst
-			else
-				echo "$2 REBASE=NO" >> pkg.lst
-			fi
+			[[ $CHOICE = 'y' ]] && sed -i "${INDEX}s/$/ REBASE=YES/" pkg.lst
 
 			# get index number of package for sed
 			get_idx $2
 			echo -n "Perform shallow updates on this package? [y/N]"
 			read CHOICE
 
-			if [[ $CHOICE = 'y' ]]; then
-				sed -i "${INDEX}s/$/ SHALLOW=YES/" pkg.lst
-			else
-				sed -i "${INDEX}s/$/ SHALLOW=NO/" pkg.lst
-			fi
+			[[ $CHOICE = 'y' ]] && sed -i "${INDEX}s/$/ SHALLOW=YES/" pkg.lst
 		else
 			echo "Subversion"
 			echo "$2 " >> pkg.lst
