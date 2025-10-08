@@ -188,6 +188,9 @@ case $1 in
 			[[ -d ".git/" ]] &&
 				export $(grep "$ENTRY" $FPKG_ROOT/pkg.lst | cut -d' ' -f2-)
 
+			# check if we only have one selected package
+			# to update, otherwise print message to indicate
+			# which one is being updated
 			[[ $# = 1 ]] || [[ $# > 2 ]] && msg "$ENTRY" ""
 			update
 		done
