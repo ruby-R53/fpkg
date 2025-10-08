@@ -69,6 +69,8 @@ get_idx() {
 
 # to perform an update
 update() {
+	# check if we own the directory before performing the update
+	# on it
 	CURR_USRGRP=($(id -nu | tr '\n' ' '; id -nG))
 	OWNER_USRGRP=($(stat -c "%U %G" .))
 	if [[ ${CURR_USRGRP[0]} == ${OWNER_USRGRP[0]} ]]; then
@@ -163,58 +165,32 @@ case $1 in
 	# refresh all packages using their
 	# source VCS' tool
 	"update" | "u")
-		# no extra arguments? then all packages will be checked
-		if [[ -z $2 ]] || [[ $2 = "-x" ]]; then
-			# get what packages we have
-			ENTRIES=("$(cut -d' ' -f1 pkg.lst | tr '\n' ' ')")
+		# get what packages we have
+		ENTRIES=("$(cut -d' ' -f1 pkg.lst | tr '\n' ' ')")
 
-			# check if we've got packages to exclude from
-			# our upgrade session
+		if [[ ! -z $2 ]]; then
 			if [[ $2 = "-x" ]]; then
 				for EXCLUDE in ${@:3}; do
 					exist_check $EXCLUDE
 					ENTRIES=("$(echo ${ENTRIES[@]} | sed "s/$EXCLUDE//")")
 				done
+			else
+				ENTRIES="${@:2}"
 			fi
-
-			for PKG in ${ENTRIES[@]}; do
-				cd $PKG 2> /dev/null
-
-				if [[ $? != 0 ]]; then
-					# couldn't change to that package's directory?
-					msg "WARNING" \
-						"$PKG does not exist! \
-						\nRemove its entry with \`fpkg delete' and retry."
-					continue
-				fi
-
-				# weird way of checking if a package needs rebase or not
-				# or if a shallow update was requested for it
-				[[ -d ".git/" ]] &&
-					export $(grep "$PKG" $FPKG_ROOT/pkg.lst | cut -d' ' -f2-)
-
-				msg "$PKG" ""
-				update
-			done
-		# or update just those particular packages
-		else
-			for PKG in ${@:2}; do
-				exist_check $PKG
-				cd $PKG 2> /dev/null
-
-				# ditto
-				[[ -d ".git/" ]] &&
-					export $(grep "$PKG" $FPKG_ROOT/pkg.lst | cut -d' ' -f2-)
-
-				# check if we've got more than a single
-				# package to update so that we can print
-				# names
-				[[ $# > 2 ]] && msg "$PKG" ""
-
-				# and perform the actual update
-				update
-			done
 		fi
+
+		for ENTRY in ${ENTRIES[@]}; do
+			exist_check $ENTRY
+			cd $ENTRY
+
+			# weird way of checking if a package needs rebase or not
+			# or if a shallow update was requested for it
+			[[ -d ".git/" ]] &&
+				export $(grep "$ENTRY" $FPKG_ROOT/pkg.lst | cut -d' ' -f2-)
+
+			[[ $# = 1 ]] || [[ $# > 2 ]] && msg "$ENTRY" ""
+			update
+		done
 		;;
 
 	# requested the installation of a package?
