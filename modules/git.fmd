@@ -1,0 +1,71 @@
+#!/bin/bash
+
+update() {
+	PULL_WITH=(--recurse-submodules=on-demand)
+
+	# check if rebase is required
+	[[ $REBASE = "YES" ]] && PULL_WITH+=(--rebase)
+
+	# ditto for shallow updates
+	[[ $SHALLOW = "YES" ]] && PULL_WITH+=(--depth 1 --rebase)
+
+	git pull ${PULL_WITH[@]}
+
+	# so that the options don't get mixed
+	# across updating different packages
+	unset PULL_WITH
+}
+
+register() {
+	if [[ -d "$FPKG_ROOT/$PKG/.git/" ]]; then
+		# make keystrokes visible again
+		stty echo
+
+		echo "Git"
+		echo "Does your package require to be updated with"
+		echo -n "\`git pull --rebase'? [y/N] "
+		read CHOICE
+
+		echo "$PKG VCS_MDL=git" >> pkg.lst
+
+		# get index number of package for sed
+		get_idx $PKG
+		[[ $CHOICE = 'y' ]] && sed -i "${INDEX}s/$/ REBASE=YES/" pkg.lst
+
+		echo -n "Perform shallow updates on this package? [y/N] "
+		read CHOICE
+
+		[[ $CHOICE = 'y' ]] && sed -i "${INDEX}s/$/ SHALLOW=YES/" pkg.lst
+	else
+		((++UNSUPPORTED))
+	fi
+}
+
+swbrnch() {
+	git switch $BRANCH
+}
+
+getmsg() {
+	# get diff instead?
+	if [[ $DIFF ]]; then
+		git show
+	else
+		# our message format for git
+		PRETTY=("%C(white default bold)Who:%C(reset) %cn"
+			"%n%C(white default bold)What:%C(reset) %s")
+
+		# check if we got a commit body to print as well
+		[[ ! -z $(git --no-pager log -1 --pretty="%b") ]] &&
+			PRETTY+=("%n%C(white default bold)Details:%C(reset) %b")
+
+		git --no-pager log -1 --pretty="${PRETTY[*]}"
+	fi
+}
+
+gethst() {
+	PRETTY=("%C(white default bold)(%cd)"
+		"%nWho:%C(reset) %cn"
+		"%n%C(white default bold)What:%C(reset) %s"
+		"%n%b")
+	git --no-pager log -$DEPTH --pretty="${PRETTY[*]}"
+}

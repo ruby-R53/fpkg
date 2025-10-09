@@ -10,8 +10,8 @@ svn-based ones only.
 
 ### "And how's that work?"
 
-`fpkg` needs 2 files in order to run: the text file `pkg.list` and the directory
-`ii/` present on the directory it'll work on.
+`fpkg` needs 4 files in order to run: the text file `pkg.list`, the directory
+`ii/` present on the directory it'll work on, `/etc/fpkg/` and related.
 
 `pkg.list` contains a newline-separated list of all packages, and you currently have to
 register them manually. You can easily do this by running `fpkg add`.
@@ -25,6 +25,15 @@ The `ii` directory contains little scripts written manually (with a template pro
 course) for installing and uninstalling packages. Since not every package uses the same
 steps for building, that was the solution I came up with. `fpkg add` already redirects
 you to write those steps using your text editor of choice, though!
+
+Then, as for the files in `/etc/fpkg/`···
+- `/etc/fpkg/fpkg.conf`: the configuration file containing all information needed for
+  fpkg to work according to your environment. See more below.
+- `/etc/fpkg/bashrc`: the resource file for the Bash shell used by fpkg to work on your
+  packages' directories. It's not a whole separate environment, but it's different
+  enough to recognize it.
+- `/etc/fpkg/modules/`: module files. Those tell fpkg how to perform updates, get commit
+  messages and such. You *must* have it, otherwise nothing will even work at all.
 
 ### Requirements
 
@@ -45,8 +54,10 @@ preinstalled):
 
 1. Simply install the program by running `make`. By default, this will install the script
 itself to `/usr/local/bin/`, along with the configuration file `fpkg.conf` and the bundled
-`bashrc` file to `/etc/fpkg/`. The completion script, `fpkg.bashcomplete`, is then
-installed to `/usr/share/bash-completion/completions/`.
+`bashrc` file to `/etc/fpkg/`.
+The modules are also installed to a subdirectory of that, `modules/`.
+The completion script, `fpkg.bashcomplete`, is then installed to
+`/usr/share/bash-completion/completions/`.
 
 You may then change `$PREFIX` to whatever directory you'd like the script to be installed
 on.

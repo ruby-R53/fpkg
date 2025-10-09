@@ -1,3 +1,16 @@
+**October 8th, 2025:**
+- Introducing, MODULES! Yet again···
+  - ···BECAUSE IT FUCKING WORKS THIS TIME!
+    I swear my brain just came up with a solution for that
+    completely out of the blue. It was so damn easy, coming to
+    think of it.
+  - All VCS-related options now require that to work. All VCSes
+    have their compatibility enabled by having a module file in
+    `/etc/fpkg/modules/`, a new directory made for storing
+    such.
+    fpkg will remaing coming with support for both Git and SVN,
+    at least for now.
+
 **October 6th, 2025:**
 - fpkg no longer requires awk now.
   - I just remembered `cut` exists, and it's so much better.

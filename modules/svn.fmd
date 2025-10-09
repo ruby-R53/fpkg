@@ -1,0 +1,37 @@
+#!/bin/bash
+
+update() {
+	# don't print that "Updating"
+	# line, make it a lil' cleaner
+	svn update | tail -n+2
+}
+
+register() {
+	if [[ -d "$FPKG_ROOT/$PKG/.svn/" ]]; then
+		echo "Subversion"
+		echo "$PKG VCS_MDL=svn" >> pkg.lst
+	else
+		((++UNSUPPORTED))
+	fi
+}
+
+swbrnch() {
+	svn switch $BRANCH
+}
+
+getmsg() {
+	# add a pager to the diff output like
+	# in git's as well
+	if [[ $DIFF ]]; then
+		svn log -l1 -v --diff | less
+	else
+		# remove those hyphens at the top and
+		# bottom of the output to make it
+		# cleaner
+		svn log -l1 -v | head -n-1 | tail -n+2
+	fi
+}
+
+gethst() {
+	svn log -l$DEPTH -v | head -n-1 | tail -n+2
+}
