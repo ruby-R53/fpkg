@@ -240,7 +240,7 @@ case $1 in
 
 			if [[ $CHOICE = 'y' ]]; then # default to 'no' just to be safe
 				get_idx $2
-				sed -i ${INDEX}d pkg.lst # and delete the package from it
+				sed -i "${INDEX}d" pkg.lst # and delete the package from it
 				rm ii/$2.ii
 				rm -rf $2 || error "failed to delete $2!"
 			fi
@@ -392,7 +392,7 @@ case $1 in
 		stty echo
 
 		get_idx $2
-		sed -i ${INDEX}d pkg.lst # and delete the package from it
+		sed -i "${INDEX}d" pkg.lst # and delete the package from it
 		rm ii/$2.ii
 		echo "$2 removed from pkg.lst, would you like to remove its files"
 		echo -n "as well? [y/N] "
