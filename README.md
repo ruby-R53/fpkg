@@ -43,12 +43,12 @@ the script's program calls, nothing crazy.
 Besides that, you'll also need the following (which most distros should already ship
 preinstalled):
 
-- coreutils (cat, cut, echo, mkdir, stty)
+- coreutils (`cat`, `cut`, `echo`, `mkdir`, `stat`, `stty`, `tr`)
 - grep
 - less
 - sed
 - make
-- at least one of: git and svn (duh)
+- at least one of: git, svn (duh)
 
 ### Setup
 
