@@ -4,7 +4,7 @@
 source /etc/fpkg.conf
 
 # adapt our package list to something Bash understands
-PKGLIST="$(awk '{ print $1 }' ${FPKG_ROOT}/pkg.lst | tr '\n' ' ')"
+PKGLIST="$(cut -d' ' -f1 ${FPKG_ROOT}/pkg.lst | tr '\n' ' ')"
 
 # and finally, apply the completion list
 complete -W "${PKGLIST}" fpkg
