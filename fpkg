@@ -22,17 +22,17 @@ msg() {
 		tput setaf 7 # and white for anything else
 	fi
 
-	echo -n $1
+	printf "$1"
 	tput setaf 7
-	echo -n ": "
+	printf ": "
 	tput sgr0
-	echo -e $2
+	printf "${*:2}"
 }
 
 # to display an error and also quit with non-zero
 error() { 
-	msg "ERROR" "$1" # then, actually print the error
-	quit 1 # exit with error code
+	msg "ERROR" "${*:1}\n"
+	quit 1 # FIXME should this not be hardcoded?
 }
 
 # to check if a package exists
@@ -41,8 +41,7 @@ exist_check() {
 
 	# checking return type to see if the package exists
 	grep -E "^$1( )" $FPKG_ROOT/pkg.lst > /dev/null ||
-		error "$1 not found in pkg.lst! \
-			\nWas it a typo?"
+		error "$1 not found in pkg.lst!" "\nWas it a typo?"
 }
 
 # to check if elevated privileges are needed
@@ -57,8 +56,9 @@ write_check() {
 
 	# if any of the touch's fail
 	[[ $RET > 0 ]] &&
-		error "$FPKG_ROOT is unwriteable! \
-		\nTry running as root instead."
+		error \
+			"$FPKG_ROOT is unwriteable!"\
+			"\nTry running as root instead."
 }
 
 # to get the index number of a package, used for
@@ -69,8 +69,7 @@ get_idx() {
 
 # check if the user has VCS modules
 [[ -z "$(ls /etc/fpkg/modules/)" ]] &&
-	error "no VCS modules found! \
-		\nAborting..."
+	error "no VCS modules found!" "\nAborting..."
 
 # get our configuration file containing all the
 # environment variables needed for this to work
@@ -78,12 +77,12 @@ source /etc/fpkg.conf || error "failed to get configuration file! Aborting..."
 
 # then, check if we even have a proper setup
 if [[ -z $FPKG_ROOT ]] || [[ -z $EDITOR ]]; then
-	msg "ERROR" "\$FPKG_ROOT and/or \$EDITOR unset! \
-		\nSet both of these variables and try again."
+	msg "ERROR"\
+		"\$FPKG_ROOT and/or \$EDITOR unset!"\
+		"\nSet both of these variables and try again."
 
 	quit 2
-else
-	# then go set the environment up
+else # then go set the environment up
 	stty -echo          # hide keystrokes, not sure how to discard them too
 	pushd . > /dev/null # save user's current directory
 	cd $FPKG_ROOT       # so that we can go to $FPKG_ROOT
@@ -92,7 +91,8 @@ fi
 # check if $FPKG_ROOT exists in the first place,
 # else perform an initial setup
 if [[ ! -d $FPKG_ROOT ]]; then
-	msg "ERROR" "$FPKG_ROOT does not exist! Create it now? [Y/n] "
+	msg "ERROR"\
+		"$FPKG_ROOT does not exist! Create it now? [Y/n] "
 	read CHOICE
 
 	if [[ $CHOICE != "n" ]]; then # so that the default is "yes"
@@ -106,8 +106,9 @@ fi
 # also check if ii/ exists too,
 # in case only the former already existed
 if [[ ! -d $FPKG_ROOT/ii ]]; then
-	msg "ERROR" "$FPKG_ROOT/ii does not exist! \
-		\nCreating it and aborting now..."
+	msg "ERROR"\
+		"$FPKG_ROOT/ii does not exist!"\
+		"\nCreating it and aborting now..."
 	mkdir -pv $FPKG_ROOT/ii
 
 	quit 1
@@ -181,7 +182,7 @@ case $1 in
 
 			# change window title too so that the user
 			# knows it's still running
-			echo -en '\e]0;fpkg: building...\a'
+			printf "\e]0;fpkg: building...\a"
 
 			# check if the installation requires
 			# interaction with the user
@@ -216,7 +217,7 @@ case $1 in
 		# then, tell the user about the log file
 		# location
 		[[ $FPKG_LOG && $LOG_FMT ]] &&
-			echo -e \\n"Build log(s) saved to $LOGFILE."
+			printf "\nBuild log(s) saved to $LOGFILE."
 		;;
 
 	# requested the uninstallation of a package?
@@ -233,9 +234,10 @@ case $1 in
 		# from their system as well
 		if [[ $? = 0 ]]; then
 			stty echo
-			echo    "Would you like to remove this package's"
-			echo    "entry from pkg.lst and its files as"
-			echo -n "well? [y/N] "
+			printf \
+				"Would you like to remove this package's\n"\
+				"entry from pkg.lst and its files as\n"\
+				"well? [y/N] "
 			read CHOICE
 
 			if [[ $CHOICE = 'y' ]]; then # default to 'no' just to be safe
@@ -256,7 +258,7 @@ case $1 in
 		# tell user how many packages in total
 		# they have too
 		echo
-		msg "Total" "$(cat pkg.lst | wc -l)"
+		msg "Total" "$(cat pkg.lst | wc -l)\n"
 		;;
 
 	# adding an entry to the list?
@@ -267,8 +269,9 @@ case $1 in
 		# then, check if we have the directory for the
 		# requested package
 		[[ ! -d $FPKG_ROOT/$2 ]] &&
-			error "directory for package not found! \
-			\nWas it a typo?"
+			error \
+				"directory for package not found!"\
+				"\nWas it a typo?"
 
 		grep -w $2 pkg.lst > /dev/null && error "$2 already registered!"
 
@@ -277,7 +280,7 @@ case $1 in
 		# check if version control type is supported by
 		# this script too
 		tput bold; tput setaf 6
-		echo -n "Detecting VCS... " # tell the user about it prettily
+		printf "Detecting VCS... " # tell the user about it prettily
 		tput sgr0
 		# try one of them until they match the 
 		# package's contents
@@ -288,37 +291,38 @@ case $1 in
 			register || continue
 		done
 		# if all VCS modules don't support it...
-		if [[ $UNSUPPORTED = $(ls $FPKG_ROOT/modules/* | wc -l) ]]; then
-			printf "\r"
+		[[ $UNSUPPORTED = "$(ls $FPKG_ROOT/modules/* | wc -l)" ]] &&
 			error "no compatible VCS for package found!"
-		fi
 
-		# write a template for it to make it easier for the user
-		# i couldn't get this to work by using a single call to
-		# echo so i came up with this
-		echo    "# - Installation instructions for package $2 -"   >  ii/$2.ii
-		echo    "# Inside install(), write the commands for"       >> ii/$2.ii
-		echo    "# installing the package, and inside remove(),"   >> ii/$2.ii
-		echo -e "# write the commands for uninstalling it too."\\n >> ii/$2.ii
+		# then, write a template for it to make it easier for the user
+		printf \
+			"# - Installation instructions for package $2 -\n"\
+			"# Inside install(), write the commands for\n"\
+			"# installing the package, and inside remove(),\n"\
+			"# write the commands for uninstalling it too.\n" > ii/$2.ii
 		
-		# write a commented out privilege check section so that if
+		# also write a commented out privilege check section so that if
 		# there're any steps requiring elevated privileges a check
-		# is made for it
-		echo    "# Uncomment if elevated privileges are required"    >> ii/$2.ii
-		echo    "# for installing this package"                      >> ii/$2.ii
-		echo    "#if [[ \$(id -u) != 0 ]]; then"                     >> ii/$2.ii
-		echo -e "#\\techo \"This action requires root privileges!\"" >> ii/$2.ii
-		echo -e "#\\tstty echo"                                      >> ii/$2.ii
-		echo -e "#\\texit 1"                                         >> ii/$2.ii
-		echo -e "#fi"\\n                                             >> ii/$2.ii
+		# is done for that
+		printf "\n"\
+			"# Uncomment if elevated privileges are required\n"\
+			"# for installing this package\n"\
+			"#if [[ \$(id -u) != 0 ]]; then\n"\
+			"#\techo \"This action requires root privileges!\"\n"\
+			"#\tstty echo\n"\
+			"#\texit 1\n"\
+			"#fi\n" >> ii/$2.ii
 
-		echo    "# Say 'YES' if interaction is required"    >> ii/$2.ii
-		echo    "# to install this package, otherwise keep" >> ii/$2.ii
-		echo    "# this 'NO'. Don't remove this line!!"     >> ii/$2.ii
-		echo -e "INTERACTIVE=NO"\\n                         >> ii/$2.ii
+		printf "\n"\
+			"# Say 'YES' if interaction is required\n"\
+			"# to install this package, otherwise keep\n"\
+			"# this 'NO'. Don't remove this line!!\n"\
+			"INTERACTIVE=NO\n" >> ii/$2.ii
 
-		echo -e "install() {"\\n\\n"}"\\n >> ii/$2.ii
-		echo -e "remove() {"\\n\\n"}"\\n  >> ii/$2.ii
+		# then, the actual installation process
+		printf "\n"\
+			"install() {\n\n}\n\n"\
+			"remove() {\n\n}" >> ii/$2.ii
 
 		# open up the text editor so that the user can write on
 		# that template
@@ -394,8 +398,9 @@ case $1 in
 		get_idx $2
 		sed -i "${INDEX}d" pkg.lst # and delete the package from it
 		rm ii/$2.ii
-		echo "$2 removed from pkg.lst, would you like to remove its files"
-		echo -n "as well? [y/N] "
+		printf \
+			"$2 removed from pkg.lst, would you like to remove its files\n"\
+			"as well? [y/N] "
 		read CHOICE
 
 		[[ $CHOICE = 'y' ]] && rm -vrf $2
@@ -418,7 +423,7 @@ case $1 in
 			source /etc/fpkg/modules/$VCS_MDL.fmd
 
 			# print each package's name if we've got 2 or more
-			[[ $# > 2 ]] && msg "$PKG" ""
+			[[ $# > 2 ]] && msg "$PKG"
 
 			# then, actually get its commit message
 			getmsg
@@ -465,28 +470,28 @@ case $1 in
 	# didn't even input a valid action or wants to know
 	# them?
 	"help" | "h" | *)
-		msg "Usage" "$0 <action>"
-		msg "Actions (and their short forms)" ""
-		echo "(u)pdate [-x] [pkg(s)] - update every package listed in pkg.lst, you"
-		echo "                         may also choose to update one or some of"
-		echo "                         them, or e[x]clude from the list"
-		echo "(i)nstall <pkg>        - install <pkg> using \$FPKG_ROOT/ii/<pkg>.ii"
-		echo "(r)emove <pkg>         - or uninstall it using the same file"
-		echo "(l)ist                 - list registered packages"
-		echo "(a)dd <pkg>            - register <pkg>"
-		echo "(p)eek <pkg>           - peek into <pkg>'s .ii"
-		echo "(g)oto <pkg>           - start a shell session at <pkg>'s directory"
-		echo "(e)dit <pkg>           - edit <pkg>'s .ii"
-		echo "(d)elete <pkg>         - unregister <pkg>, you may also delete its files"
-		echo "                         as well"
-		echo "(m)essage [-d] <pkg>   - get commit message from <pkg>. Takes an optional"
-		echo "                         -d switch to get its diff as well, and you may"
-		echo "                         specify multiple packages"
-		echo "(H)istory [n] <pkg>    - get <pkg>'s commit history. Takes an optional"
-		echo "                         number [n] for a custom depth. Defaults to 5"
-		echo "(s)witch <pkg> <brnch> - switch <pkg>'s branch to <brnch>"
-		echo "(h)elp                 - show this help message"
-		echo "(v)ersion              - get fpkg's version"
+		msg "Usage" "$0 <action>"\
+			"\nActions (and their short forms)"\
+			"\n(u)pdate [-x] [pkg(s)] - update every package listed in pkg.lst, you"\
+			"\n                         may also choose to update one or some of"\
+			"\n                         them, or e[x]clude from the list"\
+			"\n(i)nstall <pkg>        - install <pkg> using \$FPKG_ROOT/ii/<pkg>.ii"\
+			"\n(r)emove <pkg>         - or uninstall it using the same file"\
+			"\n(l)ist                 - list registered packages"\
+			"\n(a)dd <pkg>            - register <pkg>"\
+			"\n(p)eek <pkg>           - peek into <pkg>'s .ii"\
+			"\n(g)oto <pkg>           - start a shell session at <pkg>'s directory"\
+			"\n(e)dit <pkg>           - edit <pkg>'s .ii"\
+			"\n(d)elete <pkg>         - unregister <pkg>, you may also delete its files"\
+			"\n                         as well"\
+			"\n(m)essage [-d] <pkg>   - get commit message from <pkg>. Takes an optional"\
+			"\n                         -d switch to get its diff as well, and you may"\
+			"\n                         specify multiple packages"\
+			"\n(H)istory [n] <pkg>    - get <pkg>'s commit history. Takes an optional"\
+			"\n                         number [n] for a custom depth. Defaults to 5"\
+			"\n(s)witch <pkg> <brnch> - switch <pkg>'s branch to <brnch>"\
+			"\n(h)elp                 - show this help message"\
+			"\n(v)ersion              - get fpkg's version\n"
 
 		# exit with error code if input wasn't
 		# for the help text
