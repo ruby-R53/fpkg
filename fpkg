@@ -162,7 +162,7 @@ case $1 in
 			# check if we only have one selected package
 			# to update, otherwise print message to indicate
 			# which one is being updated
-			[[ $# = 1 ]] || [[ $# > 2 ]] && msg "$ENTRY" ""
+			[[ $# = 1 ]] || [[ $# > 2 ]] && msg "$ENTRY" "\n"
 			update
 
 			# and then go to the previous dir
