@@ -470,27 +470,27 @@ case $1 in
 	# didn't even input a valid action or wants to know
 	# them?
 	"help" | "h" | *)
-		msg "Usage" "$0 <action>"\
-			"\nActions (and their short forms)"\
-			"\n(u)pdate [-x] [pkg(s)] - update every package listed in pkg.lst, you"\
-			"\n                         may also choose to update one or some of"\
-			"\n                         them, or e[x]clude from the list"\
-			"\n(i)nstall <pkg>        - install <pkg> using \$FPKG_ROOT/ii/<pkg>.ii"\
-			"\n(r)emove <pkg>         - or uninstall it using the same file"\
-			"\n(l)ist                 - list registered packages"\
-			"\n(a)dd <pkg>            - register <pkg>"\
-			"\n(p)eek <pkg>           - peek into <pkg>'s .ii"\
-			"\n(g)oto <pkg>           - start a shell session at <pkg>'s directory"\
-			"\n(e)dit <pkg>           - edit <pkg>'s .ii"\
-			"\n(d)elete <pkg>         - unregister <pkg>, you may also delete its files"\
-			"\n                         as well"\
-			"\n(m)essage [-d] <pkg>   - get commit message from <pkg>. Takes an optional"\
-			"\n                         -d switch to get its diff as well, and you may"\
-			"\n                         specify multiple packages"\
-			"\n(H)istory [n] <pkg>    - get <pkg>'s commit history. Takes an optional"\
-			"\n                         number [n] for a custom depth. Defaults to 5"\
-			"\n(s)witch <pkg> <brnch> - switch <pkg>'s branch to <brnch>"\
-			"\n(h)elp                 - show this help message"\
+		msg "Usage" "$0 <action>"
+		msg "\nActions (and their short forms)" \
+			"\n(u)pdate [-x] [pkg(s)] - update every package listed in pkg.lst, you" \
+			"\n                         may also choose to update one or some of" \
+			"\n                         them, or e[x]clude from the list" \
+			"\n(i)nstall <pkg>        - install <pkg> using \$FPKG_ROOT/ii/<pkg>.ii" \
+			"\n(r)emove <pkg>         - or uninstall it using the same file" \
+			"\n(l)ist                 - list registered packages" \
+			"\n(a)dd <pkg>            - register <pkg>" \
+			"\n(p)eek <pkg>           - peek into <pkg>'s .ii" \
+			"\n(g)oto <pkg>           - start a shell session at <pkg>'s directory" \
+			"\n(e)dit <pkg>           - edit <pkg>'s .ii" \
+			"\n(d)elete <pkg>         - unregister <pkg>, you may also delete its files" \
+			"\n                         as well" \
+			"\n(m)essage [-d] <pkg>   - get commit message from <pkg>. Takes an optional" \
+			"\n                         -d switch to get its diff as well, and you may" \
+			"\n                         specify multiple packages" \
+			"\n(H)istory [n] <pkg>    - get <pkg>'s commit history. Takes an optional" \
+			"\n                         number [n] for a custom depth. Defaults to 5" \
+			"\n(s)witch <pkg> <brnch> - switch <pkg>'s branch to <brnch>" \
+			"\n(h)elp                 - show this help message" \
 			"\n(v)ersion              - get fpkg's version\n"
 
 		# exit with error code if input wasn't
