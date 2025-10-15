@@ -37,7 +37,7 @@ error() {
 
 # to check if a package exists
 exist_check() {
-	[[ -z $1 ]] && error "package name not provided!"
+	test -z $1 && error "package name not provided!"
 
 	# checking return type to see if the package exists
 	grep -E "^$1( )" $FPKG_ROOT/pkg.lst > /dev/null ||
@@ -68,7 +68,7 @@ get_idx() {
 }
 
 # check if the user has VCS modules
-[[ -z "$(ls /etc/fpkg/modules/)" ]] &&
+test -z "$(ls /etc/fpkg/modules/)" &&
 	error "no VCS modules found!" "\nAborting..."
 
 # get our configuration file containing all the
@@ -77,8 +77,8 @@ source /etc/fpkg.conf || error "failed to get configuration file! Aborting..."
 
 # then, check if we even have a proper setup
 if [[ -z $FPKG_ROOT ]] || [[ -z $EDITOR ]]; then
-	msg "ERROR"\
-		"\$FPKG_ROOT and/or \$EDITOR unset!"\
+	msg "ERROR" \
+		"\$FPKG_ROOT and/or \$EDITOR unset!" \
 		"\nSet both of these variables and try again."
 
 	quit 2
@@ -91,7 +91,7 @@ fi
 # check if $FPKG_ROOT exists in the first place,
 # else perform an initial setup
 if [[ ! -d $FPKG_ROOT ]]; then
-	msg "ERROR"\
+	msg "ERROR" \
 		"$FPKG_ROOT does not exist! Create it now? [Y/n] "
 	read CHOICE
 
@@ -106,8 +106,8 @@ fi
 # also check if ii/ exists too,
 # in case only the former already existed
 if [[ ! -d $FPKG_ROOT/ii ]]; then
-	msg "ERROR"\
-		"$FPKG_ROOT/ii does not exist!"\
+	msg "ERROR" \
+		"$FPKG_ROOT/ii does not exist!" \
 		"\nCreating it and aborting now..."
 	mkdir -pv $FPKG_ROOT/ii
 
@@ -126,7 +126,7 @@ case $1 in
 			if [[ $2 = "-x" ]]; then
 				for EXCLUDE in ${@:3}; do
 					exist_check $EXCLUDE
-					ENTRIES=("$(echo ${ENTRIES[@]} | sed "s/$EXCLUDE//")")
+					ENTRIES=("$(echo ${ENTRIES[@]} | sed "/$EXCLUDE/d")")
 				done
 			else
 				ENTRIES="${@:2}"
@@ -139,10 +139,10 @@ case $1 in
 			# on it
 			CURR_USRGRP=($(id -nu | tr '\n' ' '; id -nG))
 			OWNER_USRGRP=($(stat -c "%U %G" .))
-			if [[ ${CURR_USRGRP[0]} == ${OWNER_USRGRP[0]} ]]; then
+			if [[ ${CURR_USRGRP[0]} = ${OWNER_USRGRP[0]} ]]; then
 				for GROUP in ${CURR_USRGRP[@]:1}; do
 					# keep trying until we get a match
-					[[ $GROUP == ${OWNER_USRGRP[1]} ]] && break
+					[[ $GROUP = ${OWNER_USRGRP[1]} ]] && break
 				done
 				[[ $GROUP != ${OWNER_USRGRP[1]} ]] &&
 					error "your group doesn't own this package's directory!"
@@ -156,7 +156,7 @@ case $1 in
 
 			# weird way of checking if a package needs rebase or not
 			# or if a shallow update was requested for it
-			[[ -d ".git/" ]] &&
+			test -d ".git/" &&
 				export $(grep "$ENTRY" $FPKG_ROOT/pkg.lst | cut -d' ' -f2-)
 
 			# check if we only have one selected package
@@ -199,7 +199,7 @@ case $1 in
 				# check if the log dir exists first
 				# and create it accordingly as it's 
 				# by default inside /tmp
-				[[ ! -d $FPKG_LOG ]] && mkdir $FPKG_LOG
+				test -d $FPKG_LOG || mkdir $FPKG_LOG
 
 				# $LOG_FMT gets expanded here for creating the file
 				LOGFILE=$FPKG_LOG/$(printf "$PKG-%($LOG_FMT)T")
@@ -264,13 +264,13 @@ case $1 in
 	# adding an entry to the list?
 	"add" | "a")
 		# check if we even have the package's name first
-		[[ -z $2 ]] && error "package name not provided!"
+		test -z $2 && error "package name not provided!"
 
 		# then, check if we have the directory for the
 		# requested package
-		[[ ! -d $FPKG_ROOT/$2 ]] &&
+		test -d $FPKG_ROOT/$2 ||
 			error \
-				"directory for package not found!"\
+				"directory for package not found!" \
 				"\nWas it a typo?"
 
 		grep -w $2 pkg.lst > /dev/null && error "$2 already registered!"
@@ -346,7 +346,7 @@ case $1 in
 	"goto" | "g")
 		exist_check $2
 
-		[[ -r "/etc/fpkg/bashrc" ]] ||
+		test -r "/etc/fpkg/bashrc" ||
 			error "no existing or readable bashrc file found in /etc/fpkg/!"
 
 		stty echo
