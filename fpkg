@@ -257,8 +257,7 @@ case $1 in
 
 		# tell user how many packages in total
 		# they have too
-		echo
-		msg "Total" "$(cat pkg.lst | wc -l)\n"
+		msg "\nTotal" "$(cat pkg.lst | wc -l)\n"
 		;;
 
 	# adding an entry to the list?
