@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/env bash
 
 # to restore the terminal state and exit with a code
 quit() {
