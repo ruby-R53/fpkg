@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # to restore the terminal state and exit with a code
 quit() {
@@ -67,8 +67,21 @@ get_idx() {
 	export INDEX=$(grep -wno "^$1" pkg.lst | cut -d':' -f1)
 }
 
+# to get the VCS a certain package uses
+get_vcs() {
+	export $(grep "$1" $FPKG_ROOT/pkg.lst | grep -o "VCS_MDL=.*")
+}
+
+# get the system we're currently running on, so we get
+# the appropriate directory for the modules
+if [[ $(uname -s) = "Linux" ]]; then
+	MODULES_DIR=/etc/fpkg/modules
+else # *BSD, quite likely
+	MODULES_DIR=/usr/local/etc/fpkg/modules
+fi
+
 # check if the user has VCS modules
-test -z "$(ls /etc/fpkg/modules/)" &&
+test -z "$(ls $MODULES_DIR)" &&
 	error "no VCS modules found!" "\nAborting..."
 
 # get our configuration file containing all the
@@ -150,8 +163,8 @@ case $1 in
 				error "your user doesn't own this package's directory!"
 			fi
 
-			export $(grep "$ENTRY" $FPKG_ROOT/pkg.lst | grep -o "VCS_MDL=.*")
-			source /etc/fpkg/modules/$VCS_MDL.fmd
+			get_vcs $ENTRY
+			source $MODULES_DIR/$VCS_MDL.fmd
 			cd $ENTRY
 
 			# weird way of checking if a package needs rebase or not
@@ -283,45 +296,44 @@ case $1 in
 		tput sgr0
 		# try one of them until they match the 
 		# package's contents
-		for VCS_MDL in $FPKG_ROOT/modules/*; do
+		for VCS_MDL in $MODULES_DIR/*; do
 			source $VCS_MDL
 			# add package to the list
 			export PKG=$2
 			register || continue
 		done
 		# if all VCS modules don't support it...
-		[[ $UNSUPPORTED = "$(ls $FPKG_ROOT/modules/* | wc -l)" ]] &&
+		[[ $UNSUPPORTED = "$(ls $MODULES_DIR/* | wc -l)" ]] &&
 			error "no compatible VCS for package found!"
 
-		# then, write a template for it to make it easier for the user
-		printf \
-			"# - Installation instructions for package $2 -\n"\
-			"# Inside install(), write the commands for\n"\
-			"# installing the package, and inside remove(),\n"\
-			"# write the commands for uninstalling it too.\n" > ii/$2.ii
-		
-		# also write a commented out privilege check section so that if
-		# there're any steps requiring elevated privileges a check
-		# is done for that
-		printf "\n"\
-			"# Uncomment if elevated privileges are required\n"\
-			"# for installing this package\n"\
-			"#if [[ \$(id -u) != 0 ]]; then\n"\
-			"#\techo \"This action requires root privileges!\"\n"\
-			"#\tstty echo\n"\
-			"#\texit 1\n"\
-			"#fi\n" >> ii/$2.ii
+# then, write a template for it to make it easier for the user
+cat >> ii/$2.ii << EOF
+# - Installation instructions for package $2 -
+# Inside install(), write the commands for
+# installing the package, and inside remove(),
+# write the commands for uninstalling it too.
 
-		printf "\n"\
-			"# Say 'YES' if interaction is required\n"\
-			"# to install this package, otherwise keep\n"\
-			"# this 'NO'. Don't remove this line!!\n"\
-			"INTERACTIVE=NO\n" >> ii/$2.ii
+# Uncomment if elevated privileges are required
+# for installing this package
+#if [[ \$(id -u) != 0 ]]; then
+#	echo "This action requires root privileges!"
+#	stty echo
+#	exit 1
+#fi
 
-		# then, the actual installation process
-		printf "\n"\
-			"install() {\n\n}\n\n"\
-			"remove() {\n\n}" >> ii/$2.ii
+# Say 'YES' if interaction is required
+# to install this package, otherwise keep
+# this 'NO'. Don't remove this line!!
+INTERACTIVE=NO
+
+install() {
+
+}
+
+remove() {
+
+}
+EOF
 
 		# open up the text editor so that the user can write on
 		# that template
@@ -378,8 +390,8 @@ case $1 in
 		if [[ ! -z $3 ]]; then
 			cd $2
 
-			export $(grep "$2" $FPKG_ROOT/pkg.lst | grep -o "VCS_MDL=.*")
-			source /etc/fpkg/modules/$VCS_MDL.fmd
+			get_vcs $2
+			source $MODULES_DIR/$VCS_MDL.fmd
 			BRANCH=$3
 			swbrnch
 		else
@@ -418,11 +430,11 @@ case $1 in
 			exist_check $PKG
 			cd $PKG
 
-			export $(grep "$PKG" $FPKG_ROOT/pkg.lst | grep -o "VCS_MDL=.*")
-			source /etc/fpkg/modules/$VCS_MDL.fmd
+			get_vcs $2
+			source $MODULES_DIR/$VCS_MDL.fmd
 
 			# print each package's name if we've got 2 or more
-			[[ $# > 2 ]] && msg "$PKG"
+			[[ $# > 2 ]] && msg "$PKG" "\n"
 
 			# then, actually get its commit message
 			getmsg
@@ -433,7 +445,7 @@ case $1 in
 
 			# also print a blank line unless it's the last
 			# message on the list
-			[[ $# > 2 ]] && [[ $PKG != ${@:$#} ]] && echo
+			[[ $PKG != ${@:$#} ]] && echo
 		done
 		;;
 
@@ -451,8 +463,8 @@ case $1 in
 		exist_check $2
 		cd $2
 
-		export $(grep "$PKG" $FPKG_ROOT/pkg.lst | grep -o "VCS_MDL=.*")
-		source /etc/fpkg/modules/$VCS_MDL.fmd
+		get_vcs $2
+		source $MODULES_DIR/$VCS_MDL.fmd
 
 		gethst
 		;;
