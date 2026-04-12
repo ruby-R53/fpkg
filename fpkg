@@ -410,8 +410,7 @@ EOF
 		sed -i "${INDEX}d" pkg.lst # and delete the package from it
 		rm ii/$2.ii
 		printf \
-			"$2 removed from pkg.lst, would you like to remove its files\n"\
-			"as well? [y/N] "
+			"$2 removed from pkg.lst, would you like to remove its files\nas well? [y/N] "
 		read CHOICE
 
 		[[ $CHOICE = 'y' ]] && rm -vrf $2
