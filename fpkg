@@ -86,7 +86,7 @@ test -z "$(ls $MODULES_DIR)" &&
 
 # get our configuration file containing all the
 # environment variables needed for this to work
-source /etc/fpkg.conf || error "failed to get configuration file! Aborting..."
+source /etc/fpkg/fpkg.conf || error "failed to get configuration file! Aborting..."
 
 # then, check if we even have a proper setup
 if [[ -z $FPKG_ROOT ]] || [[ -z $EDITOR ]]; then
@@ -247,10 +247,7 @@ case $1 in
 		# from their system as well
 		if [[ $? = 0 ]]; then
 			stty echo
-			printf \
-				"Would you like to remove this package's\n"\
-				"entry from pkg.lst and its files as\n"\
-				"well? [y/N] "
+			printf "Would you like to remove this package's entry from pkg.lst and its files as well? [y/N] "
 			read CHOICE
 
 			if [[ $CHOICE = 'y' ]]; then # default to 'no' just to be safe
