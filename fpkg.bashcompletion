@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # get $FPKG_ROOT from here
-source /etc/fpkg.conf
+source /etc/fpkg/fpkg.conf
 
 # adapt our package list to something Bash understands
 PKGLIST="$(cut -d' ' -f1 ${FPKG_ROOT}/pkg.lst | tr '\n' ' ')"
