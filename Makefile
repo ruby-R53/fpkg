@@ -17,10 +17,10 @@ install:
 	install -m 755 fpkg -t ${PREFIX}/bin/
 	mkdir -p ${CONFIG}/
 	install bashrc -t ${CONFIG}/
-	cp -i fpkg.conf -t ${CONFIG}/
 	install fpkg.bashcompletion -t ${COMPLT}/bash-completion/completions/
 	mkdir -p ${CONFIG}/modules/
 	install modules/* -t ${CONFIG}/modules/
+	cp -i fpkg.conf -t ${CONFIG}/
 
 uninstall:
 	rm /usr/share/bash-completion/completions/fpkg.bashcompletion

@@ -468,10 +468,10 @@ EOF
 	# requested the version?
 	"version" | "v")
 		tput bold
-		echo "fpkg v4.0.0a"
+		echo "fpkg v3.0.3"
 		tput sgr0
 		echo "written by ruby (https://github.com/ruby-R53),"
-		echo "during August to October 2025."
+		echo "during August 2025 to June 2026."
 		;;
 
 	# didn't even input a valid action or wants to know
