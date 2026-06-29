@@ -251,6 +251,7 @@ case $1 in
 			read CHOICE
 
 			if [[ $CHOICE = 'y' ]]; then # default to 'no' just to be safe
+				cd .. # go back to $FPKG_ROOT
 				get_idx $2
 				sed -i "${INDEX}d" pkg.lst # and delete the package from it
 				rm ii/$2.ii
